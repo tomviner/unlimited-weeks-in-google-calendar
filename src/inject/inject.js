@@ -1,20 +1,24 @@
-function trigger(ename, elem){
-    // ename: name of event
+// written in ECMAScript 6
+
+function trigger(event_names, elem){
+    // event_names: space sep names of events
     // elem: jQuery element
-    if (!elem || elem.length === 0) {
-        throw(`Cannot trigger ${ename}, element missing`)
+    if (!event_names || event_names.length === 0) {
+        console.log(elem)
+        throw(`Cannot trigger ${event_names}, element event_names`)
     }
-    var evt = document.createEvent("MouseEvents")
-    evt.initMouseEvent(ename, true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
-    var dom_elem = elem.get(0)
-    dom_elem.dispatchEvent(evt)
+    if (!elem || elem.length === 0) {
+        console.log(elem)
+        throw(`Cannot trigger ${event_names}, element missing`)
+    }
+    for (let event_name of event_names.split(' ')) {
+        var evt = document.createEvent("MouseEvents")
+        evt.initMouseEvent(event_name, true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
+        var dom_elem = elem.get(0)
+        dom_elem.dispatchEvent(evt)
+    }
+    return elem
 }
-
-function trigger_with_jquery(ename, elem){
-    $.Event()
-    elem[ename]()
-}
-
 
 var start = (n) => $('.dp-cell[class*="dp-o"]').eq(n || 0)
 var end = (n) => $('.dp-cell').eq(n || 52)
@@ -30,41 +34,40 @@ selected_day_num = () => extract_day_num(selected())
 mini_cal_first_day_num = () => extract_day_num(start())
 mini_cal_last_day_num = () => extract_day_num(end())
 
-first_day_num = () => parseInt($('#gridcontainer .month-row span').attr('class').split('ca-cdp').slice(-1)[0])
+first_day_num = () => parseInt($('#gridcontainer span[class^="ca-cdp"]').attr('class').split('ca-cdp').slice(-1)[0])
 
 class MiniCal {
     get cells () {return $('.dp-cell[class*="dp-o"]')}
     get first () {return this.cells.eq(0)}
     get last () {return this.cells.eq(7 * 6 - 1)}
     get selected () {return this.cells.filter('[class*="-selected"]')}
-    month_backward () {trigger('mousedown', $('.dp-sb-prev')); trigger('mouseup', $('.dp-sb-prev'))}
-    month_forward () {trigger('mousedown', $('.dp-sb-next')); trigger('mouseup', $('.dp-sb-next'))}
+    month_backward () {trigger('mousedown mouseup', $('.dp-sb-prev'))}
+    month_forward () {trigger('mousedown mouseup', $('.dp-sb-next'))}
     cell_from_day_num (day_num) {return this.cells.filter(`[id$="${day_num}"]`)}
     navigate_to (day_num) {
         var i = 0
         console.log('looking for', day_num, this.cell_from_day_num(day_num))
         while (day_num < mini_cal_first_day_num() || mini_cal_last_day_num() < day_num){
             console.log(mini_cal_first_day_num(), day_num, mini_cal_last_day_num())
-            if (++i > 5){
+            if (++i > 10){
                 throw "Too many loops"
             }
             if (day_num < mini_cal_first_day_num()){
-                console.log('mini_cal_first_day_num', mini_cal_first_day_num(), '>', day_num)
-                console.log('month_backward')
                 this.month_backward()
             } else if (mini_cal_last_day_num() < day_num){
-                console.log('mini_cal_last_day_num', mini_cal_last_day_num(), '<', day_num)
-                console.log('month_forward')
                 this.month_forward()
             } else {
                 throw 'unknown condition'
             }
         }
+        var target = this.cell_from_day_num(day_num)
+        if (target.length != 1){
+            throw "target not found on mini cal"
+        }
         return true
     }
 
 }
-mini_cal = new MiniCal()
 
 var set_range = function(months, weeks_to_remove){
     console.log('set_range', months, weeks_to_remove)
@@ -76,14 +79,10 @@ var set_range = function(months, weeks_to_remove){
     // // go back a couple of months
     prev_month().click()
     prev_month().click()
-
     // slide range to start today
     trigger('click', today())
-
     // move to custom view, click doesn't work here
-    trigger('mousedown', custom_view())
-    trigger('mouseup', custom_view())
-
+    trigger('mousedown mouseup', custom_view())
 
     // do a double manoeuvre: click next month during a click drag over the mini calendar.
     // this is how we reach more than one month
@@ -93,10 +92,13 @@ var set_range = function(months, weeks_to_remove){
     for (i = 0; i < months; i++) {
         mini_cal.month_forward()
     }
-    var end_day = end(days)
-    trigger('mousemove', end_day)
-    trigger('mouseup', end_day)
-    console.log(end_day, end_day.text())
+    trigger('mousemove mouseup', end(days))
+    trigger('mouseup', end(days))
+
+    // now move the calandar back to the date it started at
+    // mini_cal.month_forward()
+    // var end_day = end(days)
+    // console.log(end_day, end_day.text())
 
     // rewind the mini-cal to where we began
     for (i = 0; i < months; i++) {
@@ -104,13 +106,16 @@ var set_range = function(months, weeks_to_remove){
     }
 
     // return to selected day
-    console.log('return to selected day', target_start_day_num)
-    mini_cal.navigate_to(target_start_day_num)
-    // trigger('click', today())
+    // console.log('return to selected day', target_start_day_num)
+    // mini_cal.navigate_to(target_start_day_num)
+    // trigger('mousedown mouseup', mini_cal.cell_from_day_num(target_start_day_num))
+
+    trigger('click', today())
 }
 
 
 var num_weeks = 0
+var mini_cal = new MiniCal()
 
 function poll_custom_button_visibility(wait_ms=500) {
     var button = custom_view()
@@ -155,10 +160,8 @@ function dec_week(){
 
 $(document).ready(
     function(){
-        // triggers custom_view_buttons_visible
+        // triggers custom_view_buttons_visible event
         poll_custom_button_visibility()
-
-        setTimeout(dec_week, 3000)
     })
 
 // $(document)
