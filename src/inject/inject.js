@@ -95,22 +95,18 @@ var set_range = function(months, weeks_to_remove){
     trigger('mousemove mouseup', end(days))
     trigger('mouseup', end(days))
 
+
     // now move the calandar back to the date it started at
-    // mini_cal.month_forward()
-    // var end_day = end(days)
-    // console.log(end_day, end_day.text())
+    console.log('return to selected day', target_start_day_num)
+    // move active range forward, out the way
+    mini_cal.month_forward()
+    // we must click outside the active range, otherwise, we just select a single day
+    trigger('mousedown mouseup', end())
 
-    // rewind the mini-cal to where we began
-    for (i = 0; i < months; i++) {
-        mini_cal.month_backward()
-    }
+    // now click the date we want, in the mini map
+    mini_cal.navigate_to(target_start_day_num)
+    trigger('mousedown mouseup', mini_cal.cell_from_day_num(target_start_day_num))
 
-    // return to selected day
-    // console.log('return to selected day', target_start_day_num)
-    // mini_cal.navigate_to(target_start_day_num)
-    // trigger('mousedown mouseup', mini_cal.cell_from_day_num(target_start_day_num))
-
-    trigger('click', today())
 }
 
 
