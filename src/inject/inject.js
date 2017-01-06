@@ -11,7 +11,6 @@ function poll_custom_button_visibility(wait_ms=500) {
   }
 
 function inject_buttons(){
-    // remove this?
     num_weeks = $('.month-row').length
     let button = custom_view()
     button.after(
@@ -78,10 +77,19 @@ class MiniCal {
             }
         })
     }
+    get month_start_cells () {return this.cells.map((i, el) => {
+            if ($(el).text() === '1'){
+                return $(el)
+            } else {
+                return null
+            }
+        })
+    }
+    get month_starts_high () {return this.month_start_indexs[0] < 7}
+    get month_ends_low () {return this.month_start_indexs[1] >= 7 * 5}
     get weeks_in_month () {
-        let [this_starts_at, next_starts_at] = this.month_start_indexs
         // bools get cast to 0 or 1 here. each true is an extra week
-        return 4 + (this_starts_at < 7) + (7 * 5 < next_starts_at)
+        return 3 + this.month_starts_high + this.month_ends_low
     }
     get selected () {return this.cells.filter('[class*="-selected"]')}
     cell_from_day_num (day_num) {return this.cells.filter(`[id$="${day_num}"]`)}
@@ -110,13 +118,12 @@ class MiniCal {
     }
 }
 
-function set_range(months, weeks){
+function set_range(weeks_left){
     // console.log('set_range', months, weeks)
 
+    let weeks_wanted = weeks_left
     let target_start_day_num = first_day_num()
-    // console.log('start at day', target_start_day_num)
 
-    let days = 7 * weeks
     // get calandar into known state
     // go back a couple of months
     prev_month().click()
@@ -130,15 +137,36 @@ function set_range(months, weeks){
     // this is how we reach more than one month
     mini_cal.navigate_to(target_start_day_num)
     trigger('mousedown', mini_cal.first)
-    // trigger('mousedown', mini_cal.cell_from_day_num(target_start_day_num))
-    for (i = 0; i < months; i++) {
+    let days = 0
+    // if (!mini_cal.month_starts_high){
+    //     weeks_left--
+    // }
+    let i = -1
+    while (weeks_left > 0) {
+        i++
+        console.log(`${weeks_left} weeks left,`)
+        let weeks_in_month = mini_cal.weeks_in_month
+        if (i===0){
+            weeks_in_month += !mini_cal.month_starts_high
+        }
+        if (weeks_in_month > weeks_left){
+            days = 7 * weeks_left
+            console.log(`    + ${days} days`)
+            break
+        }
+        weeks_left -= weeks_in_month
+        console.log(`    - ${weeks_in_month} weeks_in_month`)
+        weeks_left += !mini_cal.month_ends_low
         mini_cal.month_forward()
-        // weeks_left -= mini_cal.weeks_in_month
     }
-    trigger('mousemove mouseup', mini_cal.nth(days))
-    trigger('mouseup', mini_cal.nth(days))
+    days += 7 // * mini_cal.month_starts_high
+    console.log(`stop on day ${mini_cal.nth(days - 1).text()}`, mini_cal.nth(days - 1))
+    trigger('mousemove mouseup', mini_cal.nth(days - 1))
+    trigger('mouseup', mini_cal.nth(days - 1))
 
-
+    let weeks_got = $('.month-row').length
+    custom_view().find('.goog-imageless-button-content').text(`${weeks_got} weeks`)
+    return
     // now move the calandar back to the date it started at
     // console.log('return to selected day', target_start_day_num)
     // move active range forward, out the way
@@ -150,15 +178,14 @@ function set_range(months, weeks){
     mini_cal.navigate_to(target_start_day_num)
     trigger('mousedown mouseup', mini_cal.cell_from_day_num(target_start_day_num))
 
+
 }
 
 function set_weeks(weeks){
     let weeks_before = $('.month-row').length
-    let months_to_set = parseInt((weeks - 1) / 4)
-    let weeks_to_set = (weeks - 1) % 4
-    set_range(months_to_set, weeks_to_set)
+    set_range(weeks)
     let weeks_after = $('.month-row').length
-    console.log(`set_weeks(${weeks}) --> set_range(${months_to_set}, ${weeks_to_set})`)
+    console.log(`set_weeks(${weeks}) --> set_range(${weeks})`)
     console.log(`got ${weeks_before} -->${weeks_after} (${weeks - weeks_after})`)
     console.log('---')
 }
@@ -171,7 +198,7 @@ function dec_week(){
     set_weeks(--num_weeks)
 }
 
-let num_weeks = 0
+let num_weeks
 let mini_cal = new MiniCal()
 
 $(document).ready(
