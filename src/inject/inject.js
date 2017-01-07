@@ -136,33 +136,38 @@ function set_range(weeks_left){
     // do a double manoeuvre: click next month during a click drag over the mini calendar.
     // this is how we reach more than one month
     mini_cal.navigate_to(target_start_day_num)
-    trigger('mousedown', mini_cal.first)
+    console.log(`start on day ${mini_cal.nth(mini_cal.month_start_indexs[0]+7).text()}`, mini_cal.nth(mini_cal.month_start_indexs[0]+7))
+    trigger('mousedown', mini_cal.nth(mini_cal.month_start_indexs[0]+7))
     let days = 0
-    // if (!mini_cal.month_starts_high){
-    //     weeks_left--
-    // }
     let i = -1
     while (weeks_left > 0) {
         i++
         console.log(`${weeks_left} weeks left,`)
         let weeks_in_month = mini_cal.weeks_in_month
-        if (i===0){
-            weeks_in_month += !mini_cal.month_starts_high
-        }
         if (weeks_in_month > weeks_left){
-            days = 7 * weeks_left
-            console.log(`    + ${days} days`)
+            console.log(`    < ${weeks_in_month} months - no full months left`)
             break
         }
         weeks_left -= weeks_in_month
         console.log(`    - ${weeks_in_month} weeks_in_month`)
-        weeks_left += !mini_cal.month_ends_low
         mini_cal.month_forward()
     }
-    days += 7 // * mini_cal.month_starts_high
-    console.log(`stop on day ${mini_cal.nth(days - 1).text()}`, mini_cal.nth(days - 1))
-    trigger('mousemove mouseup', mini_cal.nth(days - 1))
-    trigger('mouseup', mini_cal.nth(days - 1))
+    if (weeks_left === 0){
+        console.log(`    = exactly no weeks_left`)
+    }
+    else if (weeks_left < 0) {
+        throw `Didn't expect ${weeks_left} weeks_left`
+    } else if (weeks_left > 0) {
+        days = 7 * weeks_left
+        console.log(`    + ${days} days left`)
+    }
+    console.log(`days = ${days}`)
+    console.log(`days += ${mini_cal.month_start_indexs[0]} mini_cal.month_start_indexs[0]`)
+    days += mini_cal.month_start_indexs[0]
+
+    console.log(`stop on day ${mini_cal.nth(days).text()}`, mini_cal.nth(days))
+    trigger('mousemove mouseup', mini_cal.nth(days))
+    trigger('mouseup', mini_cal.nth(days))
 
     let weeks_got = $('.month-row').length
     custom_view().find('.goog-imageless-button-content').text(`${weeks_got} weeks`)
