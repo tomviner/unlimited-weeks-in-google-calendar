@@ -226,3 +226,12 @@ $(document).ready(
 
 $(document)
     .on("custom_view_buttons_visible", inject_buttons)
+
+// $(document)
+//     .on("custom_view_buttons_visible", function(){
+//         inject_buttons()
+//         // demo
+//         setTimeout(inc_week, 1000)
+//         setTimeout(inc_week, 1500)
+//         setTimeout(dec_week, 3000)
+//     })

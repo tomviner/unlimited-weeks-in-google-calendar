@@ -1,32 +1,21 @@
 {
-  "name": "gcal",
+  "name": "Google Calendar My Horizon",
   "version": "0.0.1",
   "manifest_version": 2,
-  "description": "This extension was created with the awesome extensionizr.com",
-  // "homepage_url": "http://extensionizr.com",
-
-  // "run_at": "document_idle",
+  "description": "Go beyond the Google Calendar 'Custom View' choices. From 1 to 999, show as many days as you like.",
+  "homepage_url": "https://github.com/tomviner/Google-Calendar-My-Horizon",
 
   "icons": {
     "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "default_locale": "en",
-  "background": {
-    "scripts": [
-      "src/bg/background.js"
-    ],
-    "persistent": true
-  },
   "page_action": {
-    "default_icon": "icons/icon19.png",
-    "default_title": "page action demo"
-    // "default_popup": "src/page_action/page_action.html"
+    "default_icon": "icons/icon16.png",
+    "default_title": "Google Calendar My Horizon"
   },
   "permissions": [
-    "contextMenus",
-    "declarativeContent",
     "https://calendar.google.com/*"
   ],
   "content_scripts": [
