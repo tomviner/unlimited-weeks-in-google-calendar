@@ -1,19 +1,15 @@
 {
-  "name": "Google Calendar My Horizon",
+  "name": "GCal Unlimited Weeks",
   "version": "0.0.1",
   "manifest_version": 2,
-  "description": "Go beyond the Google Calendar 'Custom View' choices. From 1 to 999, show as many days as you like.",
-  "homepage_url": "https://github.com/tomviner/Google-Calendar-My-Horizon",
+  "description": "Display as many weeks in Google Calendar as your screen can handle",
+  "homepage_url": "https://github.com/tomviner/gcal-unlimited-weeks",
 
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
-  },
-  "page_action": {
-    "default_icon": "icons/icon16.png",
-    "default_title": "Google Calendar My Horizon"
   },
   "permissions": [
     "https://calendar.google.com/*"
