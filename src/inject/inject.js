@@ -59,8 +59,16 @@ let next_month = () => $('#dp_0_next')
 // mini_cal_first_day_num = () => extract_day_num(start())
 // mini_cal_last_day_num = () => extract_day_num(end())
 
-// BigCal
-first_day_num = () => parseInt($('#gridcontainer span[class^="ca-cdp"]').attr('class').split('ca-cdp').slice(-1)[0])
+class BigCal {
+    get first_day_num () {
+        return parseInt(
+            $('#gridcontainer span[class^="ca-cdp"]')
+                .attr('class')
+                .split('ca-cdp')
+                .slice(-1)[0]
+        )
+    }
+}
 
 class MiniCal {
     get cells () {return $('.dp-cell[class*="dp-o"]')}
@@ -122,7 +130,8 @@ function set_range(weeks_left){
     // console.log('set_range', months, weeks)
 
     let weeks_wanted = weeks_left
-    let target_start_day_num = first_day_num()
+    let target_start_day_num = big_cal.first_day_num
+    console.log(`start on day num ${target_start_day_num}`)
 
     // get calandar into known state
     // go back a couple of months
@@ -131,12 +140,13 @@ function set_range(weeks_left){
     // slide range to start today
     trigger('click', today())
     // move to month view, click doesn't work here
-    trigger('mousedown mouseup', month_view())
+    trigger('mousedown mouseup', custom_view())
+
+    mini_cal.navigate_to(target_start_day_num)
+    console.log(`start on day ${mini_cal.nth(mini_cal.month_start_indexs[0]+7).text()}`, mini_cal.nth(mini_cal.month_start_indexs[0]+7))
 
     // do a double manoeuvre: click next month during a click drag over the mini calendar.
     // this is how we reach more than one month
-    mini_cal.navigate_to(target_start_day_num)
-    console.log(`start on day ${mini_cal.nth(mini_cal.month_start_indexs[0]+7).text()}`, mini_cal.nth(mini_cal.month_start_indexs[0]+7))
     trigger('mousedown', mini_cal.nth(mini_cal.month_start_indexs[0]+7))
     let days = 0
     let i = -1
@@ -171,9 +181,10 @@ function set_range(weeks_left){
 
     let weeks_got = $('.month-row').length
     custom_view().find('.goog-imageless-button-content').text(`${weeks_got} weeks`)
-    return
+
     // now move the calandar back to the date it started at
-    // console.log('return to selected day', target_start_day_num)
+    console.log('return to selected day', target_start_day_num)
+
     // move active range forward, out the way
     mini_cal.month_forward()
     // we must click outside the active range, otherwise, we just select a single day
@@ -205,6 +216,7 @@ function dec_week(){
 
 let num_weeks
 let mini_cal = new MiniCal()
+let big_cal = new BigCal()
 
 $(document).ready(
     function(){
@@ -212,14 +224,5 @@ $(document).ready(
         poll_custom_button_visibility()
     })
 
-// $(document)
-//     .on("custom_view_buttons_visible", inject_buttons)
-
 $(document)
-    .on("custom_view_buttons_visible", function(){
-        inject_buttons()
-        // demo
-        setTimeout(inc_week, 1000)
-        setTimeout(inc_week, 1500)
-        setTimeout(dec_week, 3000)
-    })
+    .on("custom_view_buttons_visible", inject_buttons)
