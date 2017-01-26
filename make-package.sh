@@ -1,5 +1,7 @@
 set -ex
 
-mkdir -p dist
-export version=$(grep -Po '(?<="version": ")[^"]*(?=",)' manifest.json)
-apack "dist/gcal-unlimited-weeks-${version:?}.zip" . -- --exclude '/.*' '/dist/*'
+export name=$(jq -r '.name | gsub(" "; "-") | ascii_downcase' manifest.json)
+export version=$(jq -r '.version' manifest.json)
+
+mkdir -p 'dist'
+apack "dist/${name:?}-${version:?}.zip" . -- --exclude '/.*' '/dist/*'
