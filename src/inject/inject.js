@@ -1,7 +1,7 @@
 // Written in ECMAScript 6
 
 function poll_custom_button_visibility(wait_ms=500) {
-    let button = custom_view()
+    let button = toolbar.custom_view
     console.log('poll_custom_button_visibility', button)
     if (button.is(":visible")) {
         $(document).trigger("custom_view_buttons_visible")
@@ -12,7 +12,7 @@ function poll_custom_button_visibility(wait_ms=500) {
 
 function inject_buttons(){
     num_weeks = $('.month-row').length
-    let button = custom_view()
+    let button = toolbar.custom_view
     button.after(
         function(){
             return $(this).clone().removeClass('goog-imageless-button-checked').text('-').click(dec_week)
@@ -37,6 +37,7 @@ function trigger(event_names, elem){
     }
     for (let event_name of event_names.split(' ')) {
         let evt = document.createEvent("MouseEvents")
+        // eek, there's gotta be a better way!
         evt.initMouseEvent(event_name, true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
         let dom_elem = elem.get(0)
         dom_elem.dispatchEvent(evt)
@@ -44,20 +45,14 @@ function trigger(event_names, elem){
     return elem
 }
 
-// let start = () => $('.dp-cell[class*="dp-o"]').eq(0)
-// let end = (n) => $('.dp-cell').eq(n || 52)
-let month_view = () => $('#topRightNavigation .goog-imageless-button').eq(2)
-let custom_view = () => $('#topRightNavigation .goog-imageless-button').eq(3)
-let prev_month = () => $('.navBack').eq(0)
-let today = () => $('#todayButton\\:1,#todayButton\\:2').children().eq(0)
-let next_month = () => $('#dp_0_next')
-// let selected = () => $('.dp-cell[class*="-selected"]')
-// let extract_day_num = (el) => parseInt(el.eq(0).attr('id').split('_').slice(-1)[0])
-// // days since 1st Nov 1950?
-// selected_day_num = () => extract_day_num(selected())
 
-// mini_cal_first_day_num = () => extract_day_num(start())
-// mini_cal_last_day_num = () => extract_day_num(end())
+class Toolbar {
+    get month_view () {return $('#topRightNavigation .goog-imageless-button').eq(2)}
+    get custom_view () {return $('#topRightNavigation .goog-imageless-button').eq(3)}
+    get prev_month () {return $('.navBack').eq(0)}
+    get today () {return $('#todayButton\\:1,#todayButton\\:2').children().eq(0)}
+    get next_month () {return $('#dp_0_next')}
+}
 
 class BigCal {
     get first_day_num () {
@@ -77,7 +72,7 @@ class MiniCal {
     get first_day_num () {return this.extract_day_num(this.first)}
     get last () {return this.nth(7 * 6 - 1)}
     get last_day_num () {return this.extract_day_num(this.last)}
-    get month_start_indexs () {return this.cells.map((i, el) => {
+    get month_start_indexes () {return this.cells.map((i, el) => {
             if ($(el).text() === '1'){
                 return i
             } else {
@@ -93,8 +88,8 @@ class MiniCal {
             }
         })
     }
-    get month_starts_high () {return this.month_start_indexs[0] < 7}
-    get month_ends_low () {return this.month_start_indexs[1] >= 7 * 5}
+    get month_starts_high () {return this.month_start_indexes[0] < 7}
+    get month_ends_low () {return this.month_start_indexes[1] >= 7 * 5}
     get weeks_in_month () {
         // bools get cast to 0 or 1 here. each true is an extra week
         return 3 + this.month_starts_high + this.month_ends_low
@@ -106,9 +101,7 @@ class MiniCal {
     month_forward () {trigger('mousedown mouseup', $('.dp-sb-next'))}
     navigate_to (day_num) {
         let i = 0
-        // console.log('looking for', day_num, this.cell_from_day_num(day_num))
         while (day_num < this.first_day_num || this.last_day_num < day_num){
-            // console.log(this.first_day_num, day_num, this.last_day_num)
             if (++i > 10){
                 throw "Too many loops"
             }
@@ -127,27 +120,22 @@ class MiniCal {
 }
 
 function set_range(weeks_left){
-    // console.log('set_range', months, weeks)
-
     let weeks_wanted = weeks_left
     let target_start_day_num = big_cal.first_day_num
-    console.log(`start on day num ${target_start_day_num}`)
 
-    // get calandar into known state
     // go back a couple of months
-    prev_month().click()
-    prev_month().click()
+    trigger('click click', toolbar.prev_month)
     // slide range to start today
-    trigger('click', today())
+    trigger('click', toolbar.today)
     // move to month view, click doesn't work here
-    trigger('mousedown mouseup', custom_view())
+    trigger('mousedown mouseup', toolbar.custom_view)
 
+    // ensure start date in visible in mini cal
     mini_cal.navigate_to(target_start_day_num)
-    console.log(`start on day ${mini_cal.nth(mini_cal.month_start_indexs[0]+7).text()}`, mini_cal.nth(mini_cal.month_start_indexs[0]+7))
 
     // do a double manoeuvre: click next month during a click drag over the mini calendar.
     // this is how we reach more than one month
-    trigger('mousedown', mini_cal.nth(mini_cal.month_start_indexs[0]+7))
+    trigger('mousedown', mini_cal.nth(mini_cal.month_start_indexes[0]+7))
     let days = 0
     let i = -1
     while (weeks_left > 0) {
@@ -172,15 +160,15 @@ function set_range(weeks_left){
         console.log(`    + ${days} days left`)
     }
     console.log(`days = ${days}`)
-    console.log(`days += ${mini_cal.month_start_indexs[0]} mini_cal.month_start_indexs[0]`)
-    days += mini_cal.month_start_indexs[0]
+    console.log(`days += ${mini_cal.month_start_indexes[0]} mini_cal.month_start_indexes[0]`)
+    days += mini_cal.month_start_indexes[0]
 
     console.log(`stop on day ${mini_cal.nth(days).text()}`, mini_cal.nth(days))
     trigger('mousemove mouseup', mini_cal.nth(days))
     trigger('mouseup', mini_cal.nth(days))
 
     let weeks_got = $('.month-row').length
-    custom_view().find('.goog-imageless-button-content').text(`${weeks_got} weeks`)
+    toolbar.custom_view.find('.goog-imageless-button-content').text(`${weeks_got} weeks`)
 
     // now move the calandar back to the date it started at
     console.log('return to selected day', target_start_day_num)
@@ -217,6 +205,7 @@ function dec_week(){
 let num_weeks
 let mini_cal = new MiniCal()
 let big_cal = new BigCal()
+let toolbar = new Toolbar()
 
 $(document).ready(
     function(){
