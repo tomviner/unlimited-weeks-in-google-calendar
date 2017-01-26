@@ -1,29 +1,5 @@
 // Written in ECMAScript 6
 
-function poll_custom_button_visibility(wait_ms=500) {
-    let button = toolbar.custom_view
-    console.log('poll_custom_button_visibility', button)
-    if (button.is(":visible")) {
-        $(document).trigger("custom_view_buttons_visible")
-    } else {
-        setTimeout(poll_custom_button_visibility, wait_ms)
-    }
-  }
-
-function inject_buttons(){
-    num_weeks = $('.month-row').length
-    let button = toolbar.custom_view
-    button.after(
-        function(){
-            return $(this).clone().removeClass('goog-imageless-button-checked').text('-').click(dec_week)
-        }
-    ).after(
-        function(){
-            return $(this).clone().removeClass('goog-imageless-button-checked').text('+').click(inc_week)
-        }
-    )
-}
-
 function trigger(event_names, elem){
     // event_names: space sep names of events
     // elem: jQuery element
@@ -52,6 +28,27 @@ class Toolbar {
     get prev_month () {return $('.navBack').eq(0)}
     get today () {return $('#todayButton\\:1,#todayButton\\:2').children().eq(0)}
     get next_month () {return $('#dp_0_next')}
+
+    poll_custom_button_visibility(wait_ms=500) {
+        if (this.custom_view.is(":visible")) {
+            $(document).trigger("custom_view_buttons_visible")
+        } else {
+            setTimeout((w) => this.poll_custom_button_visibility(w), wait_ms)
+        }
+    }
+
+    inject_buttons() {
+        num_weeks = $('.month-row').length
+        this.custom_view.after(
+            function() {
+                return $(this).clone().removeClass('goog-imageless-button-checked').text('-').click(dec_week)
+            }
+        ).after(
+            function() {
+                return $(this).clone().removeClass('goog-imageless-button-checked').text('+').click(inc_week)
+            }
+        )
+    }
 }
 
 class BigCal {
@@ -67,7 +64,7 @@ class BigCal {
 
 class MiniCal {
     get cells () {return $('.dp-cell[class*="dp-o"]')}
-    nth (n) {return this.cells.eq(n)}
+    nth(n) {return this.cells.eq(n)}
     get first () {return this.nth(0)}
     get first_day_num () {return this.extract_day_num(this.first)}
     get last () {return this.nth(7 * 6 - 1)}
@@ -123,10 +120,6 @@ function set_range(weeks_left){
     let weeks_wanted = weeks_left
     let target_start_day_num = big_cal.first_day_num
 
-    // go back a couple of months
-    trigger('click click', toolbar.prev_month)
-    // slide range to start today
-    trigger('click', toolbar.today)
     // move to month view, click doesn't work here
     trigger('mousedown mouseup', toolbar.custom_view)
 
@@ -194,33 +187,38 @@ function set_weeks(weeks){
     console.log('---')
 }
 
-function inc_week(){
+function inc_week() {
     set_weeks(++num_weeks)
 }
 
-function dec_week(){
+function dec_week() {
     set_weeks(--num_weeks)
 }
 
+
+let demo = true
 let num_weeks
 let mini_cal = new MiniCal()
 let big_cal = new BigCal()
 let toolbar = new Toolbar()
 
+
+if (demo===true){
+    $(document)
+        .on("custom_view_buttons_visible", toolbar.inject_buttons)
+} else {
+    $(document)
+        .on("custom_view_buttons_visible", function() {
+            toolbar.inject_buttons()
+            // demo
+            setTimeout(inc_week, 1000)
+            setTimeout(inc_week, 1500)
+            setTimeout(dec_week, 3000)
+        })
+}
+
 $(document).ready(
-    function(){
+    function() {
         // triggers custom_view_buttons_visible event
-        poll_custom_button_visibility()
+        toolbar.poll_custom_button_visibility()
     })
-
-$(document)
-    .on("custom_view_buttons_visible", inject_buttons)
-
-// $(document)
-//     .on("custom_view_buttons_visible", function(){
-//         inject_buttons()
-//         // demo
-//         setTimeout(inc_week, 1000)
-//         setTimeout(inc_week, 1500)
-//         setTimeout(dec_week, 3000)
-//     })
