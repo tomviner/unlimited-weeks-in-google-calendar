@@ -4,11 +4,9 @@ function trigger(event_names, elem) {
     // event_names: space sep names of events
     // elem: jQuery element
     if (!event_names || event_names.length === 0) {
-        console.log(elem)
         throw (`Cannot trigger ${event_names}, element event_names`)
     }
     if (!elem || elem.length === 0) {
-        console.log(elem)
         throw (`Cannot trigger ${event_names}, element missing`)
     }
     for (let event_name of event_names.split(' ')) {
@@ -170,29 +168,21 @@ function set_range(weeks_left) {
     let i = -1
     while (weeks_left > 0) {
         i++
-        console.log(`${weeks_left} weeks left,`)
         let weeks_in_month = mini_cal.weeks_in_month
         if (weeks_in_month > weeks_left) {
-            console.log(`    < ${weeks_in_month} months - no full months left`)
             break
         }
         weeks_left -= weeks_in_month
-        console.log(`    - ${weeks_in_month} weeks_in_month`)
         mini_cal.month_forward()
     }
     if (weeks_left === 0) {
-        console.log(`    = exactly no weeks_left`)
     } else if (weeks_left < 0) {
         throw `Didn't expect ${weeks_left} weeks_left`
     } else if (weeks_left > 0) {
         days = 7 * weeks_left
-        console.log(`    + ${days} days left`)
     }
-    console.log(`days = ${days}`)
-    console.log(`days += ${mini_cal.month_start_indexes[0]} mini_cal.month_start_indexes[0]`)
     days += mini_cal.month_start_indexes[0]
 
-    console.log(`stop on day ${mini_cal.nth(days).text()}`, mini_cal.nth(days))
     trigger('mousemove mouseup', mini_cal.nth(days))
     trigger('mouseup', mini_cal.nth(days))
 
@@ -200,7 +190,6 @@ function set_range(weeks_left) {
     toolbar.custom_view.find('.goog-imageless-button-content').text(`${weeks_got} weeks`)
 
     // now move the calandar back to the date it started at
-    console.log('return to selected day', target_start_day_num)
 
     // move active range forward, out the way
     mini_cal.month_forward()
@@ -216,9 +205,6 @@ function set_weeks(weeks) {
     let weeks_before = $('.month-row').length
     set_range(weeks)
     let weeks_after = $('.month-row').length
-    console.log(`set_weeks(${weeks}) --> set_range(${weeks})`)
-    console.log(`got ${weeks_before} -->${weeks_after} (${weeks - weeks_after})`)
-    console.log('---')
 }
 
 function inc_week() {
