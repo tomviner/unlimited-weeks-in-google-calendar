@@ -11,7 +11,8 @@
     "128": "icons/icon128.png"
   },
   "permissions": [
-    "https://calendar.google.com/*"
+    "https://calendar.google.com/*",
+    "storage"
   ],
   "content_scripts": [
     {

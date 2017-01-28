@@ -46,16 +46,37 @@ class Toolbar {
     }
 
     inject_buttons() {
-        num_weeks = $('.month-row').length
         this.custom_view.after(
             function() {
-                return $(this).clone().removeClass('goog-imageless-button-checked').text('-').click(dec_week)
+                return $(this)
+                    .clone()
+                    .removeClass('goog-imageless-button-checked')
+                    .text('-')
+                    .click(() => unlimited_weeks.remove_week())
             }
         ).after(
             function() {
-                return $(this).clone().removeClass('goog-imageless-button-checked').text('+').click(inc_week)
+                return $(this)
+                    .clone()
+                    .removeClass('goog-imageless-button-checked')
+                    .text('+')
+                    .click(() => unlimited_weeks.add_week())
             }
         )
+
+        if (this.custom_view.is('.goog-imageless-button-checked')){
+            this.restore_weeks()
+        }
+
+        this.custom_view.click(this.restore_weeks)
+    }
+
+    restore_weeks() {
+        chrome.storage.sync.get('num_weeks', function(data) {
+            if (data.num_weeks >= 2) {
+                unlimited_weeks.set_weeks(data.num_weeks)
+            }
+        })
     }
 }
 
@@ -68,9 +89,18 @@ class BigCal {
             .slice(-1)[0]
         )
     }
+
+    get num_weeks() {
+        return $('.month-row').length
+    }
 }
 
 class MiniCal {
+    constructor(height=6) {
+        // in weeks
+        this.height = height
+    }
+
     get cells() {
         return $('.dp-cell[class*="dp-o"]')
     }
@@ -80,16 +110,23 @@ class MiniCal {
     get first() {
         return this.nth(0)
     }
+    get last() {
+        return this.nth(7 * this.height - 1)
+    }
+    extract_day_num(el) {
+        // Google Calendar seems to label each day with a monotonic number
+        // that skips in an unknown way
+        return parseInt(el.eq(0).attr('id').split('_').slice(-1)[0])
+    }
     get first_day_num() {
         return this.extract_day_num(this.first)
-    }
-    get last() {
-        return this.nth(7 * 6 - 1)
     }
     get last_day_num() {
         return this.extract_day_num(this.last)
     }
     get month_start_indexes() {
+        // return the positions of the 1st of the current
+        // and next months
         return this.cells.map((i, el) => {
             if ($(el).text() === '1') {
                 return i
@@ -98,33 +135,26 @@ class MiniCal {
             }
         })
     }
-    get month_start_cells() {
-        return this.cells.map((i, el) => {
-            if ($(el).text() === '1') {
-                return $(el)
-            } else {
-                return null
-            }
-        })
+    get current_month_start_index() {
+        return this.month_start_indexes[0]
     }
-    get month_starts_high() {
-        return this.month_start_indexes[0] < 7
+    get next_month_start_index() {
+        return this.month_start_indexes[1]
     }
-    get month_ends_low() {
-        return this.month_start_indexes[1] >= 7 * 5
+    // current month may start in either first or second row
+    get current_month_starts_high() {
+        return this.current_month_start_index < 7
+    }
+    // next month may start in either last or penultimate row
+    get next_month_starts_low() {
+        return this.next_month_start_index >= 7 * (this.height - 1)
     }
     get weeks_in_month() {
         // bools get cast to 0 or 1 here. each true is an extra week
-        return 3 + this.month_starts_high + this.month_ends_low
-    }
-    get selected() {
-        return this.cells.filter('[class*="-selected"]')
+        return 3 + this.current_month_starts_high + this.next_month_starts_low
     }
     cell_from_day_num(day_num) {
         return this.cells.filter(`[id$="${day_num}"]`)
-    }
-    extract_day_num(el) {
-        return parseInt(el.eq(0).attr('id').split('_').slice(-1)[0])
     }
     month_backward() {
         trigger('mousedown mouseup', $('.dp-sb-prev'))
@@ -152,89 +182,95 @@ class MiniCal {
     }
 }
 
-function set_range(weeks_left) {
-    let target_start_day_num = big_cal.first_day_num
 
-    // move to month view, click doesn't work here
-    trigger('mousedown mouseup', toolbar.custom_view)
+class UnlimitedWeeks {
+    add_week() {
+        this.set_weeks(big_cal.num_weeks + 1)
+    }
 
-    // ensure start date in visible in mini cal
-    mini_cal.navigate_to(target_start_day_num)
+    remove_week() {
+        this.set_weeks(big_cal.num_weeks - 1)
+    }
 
-    // do a double manoeuvre: click next month during a click drag over the mini calendar.
-    // this is how we reach more than one month
-    trigger('mousedown', mini_cal.nth(mini_cal.month_start_indexes[0] + 7))
-    let days = 0
-    let i = -1
-    while (weeks_left > 0) {
-        i++
-        let weeks_in_month = mini_cal.weeks_in_month
-        if (weeks_in_month > weeks_left) {
-            break
+    allocate_weeks(weeks_left) {
+        while (weeks_left > 0) {
+            let weeks_in_month = mini_cal.weeks_in_month
+            if (weeks_in_month > weeks_left) {
+                break
+            }
+            weeks_left -= weeks_in_month
+            mini_cal.month_forward()
         }
-        weeks_left -= weeks_in_month
+        if (weeks_left > 0) {
+            return 7 * weeks_left
+        }
+        return 0
+    }
+
+    get_start_cell(){
+        let index = mini_cal.current_month_start_index + 7
+        return mini_cal.nth(index)
+    }
+
+    get_end_cell(days_remaining){
+        let index = days_remaining + mini_cal.current_month_start_index
+        return mini_cal.nth(index)
+    }
+
+    set_weeks(weeks_left) {
+        let target_start_day_num = big_cal.first_day_num
+
+        // move to custom view, click doesn't work here
+        trigger('mousedown mouseup', toolbar.custom_view)
+
+        // ensure start date in visible in mini cal
+        mini_cal.navigate_to(target_start_day_num)
+
+        // do a double manoeuvre: click next month during a click drag over the mini calendar.
+        // this is how we reach more than one month
+        trigger('mousedown', this.get_start_cell())
+        let days_remaining = this.allocate_weeks(weeks_left)
+        trigger('mousemove mouseup', this.get_end_cell(days_remaining))
+
+        toolbar.custom_view
+            .find('.goog-imageless-button-content')
+            .text(`${big_cal.num_weeks} weeks`)
+
+        // now move the calandar back to the date it started at
+
+        // move active range forward, out the way
         mini_cal.month_forward()
-    }
-    if (weeks_left === 0) {
-    } else if (weeks_left < 0) {
-        throw `Didn't expect ${weeks_left} weeks_left`
-    } else if (weeks_left > 0) {
-        days = 7 * weeks_left
-    }
-    days += mini_cal.month_start_indexes[0]
-
-    trigger('mousemove mouseup', mini_cal.nth(days))
-    trigger('mouseup', mini_cal.nth(days))
-
-    let weeks_got = $('.month-row').length
-    toolbar.custom_view.find('.goog-imageless-button-content').text(`${weeks_got} weeks`)
-
-    // now move the calandar back to the date it started at
-
-    // move active range forward, out the way
-    mini_cal.month_forward()
         // we must click outside the active range, otherwise, we just select a single day
-    trigger('mousedown mouseup', mini_cal.last)
+        trigger('mousedown mouseup', mini_cal.last)
 
-    // now click the date we want, in the mini map
-    mini_cal.navigate_to(target_start_day_num)
-    trigger('mousedown mouseup', mini_cal.cell_from_day_num(target_start_day_num))
+        // now click the date we want, in the mini map
+        mini_cal.navigate_to(target_start_day_num)
+        trigger('mousedown mouseup', mini_cal.cell_from_day_num(target_start_day_num))
+
+        // preserve number of weeks for next page (re)load
+        chrome.storage.sync.set({'num_weeks': big_cal.num_weeks})
+    }
 }
 
-function set_weeks(weeks) {
-    let weeks_before = $('.month-row').length
-    set_range(weeks)
-    let weeks_after = $('.month-row').length
-}
-
-function inc_week() {
-    set_weeks(++num_weeks)
-}
-
-function dec_week() {
-    set_weeks(--num_weeks)
-}
-
-
-let demo = true
-let num_weeks
+let demo = false
 let mini_cal = new MiniCal()
 let big_cal = new BigCal()
 let toolbar = new Toolbar()
+let unlimited_weeks = new UnlimitedWeeks()
 
-if (demo === true) {
-    $(document)
-        .on("custom_view_buttons_visible", toolbar.inject_buttons)
-} else {
-    $(document)
-        .on("custom_view_buttons_visible", function() {
-            toolbar.inject_buttons()
-                // demo
-            setTimeout(inc_week, 1000)
-            setTimeout(inc_week, 1500)
-            setTimeout(dec_week, 3000)
-        })
-}
+
+
+$(document)
+    .on("custom_view_buttons_visible", function() {
+        toolbar.inject_buttons()
+        if (demo === true) {
+            console.log('demo')
+            // demo
+            setTimeout(unlimited_weeks.add_week, 1000)
+            setTimeout(unlimited_weeks.add_week, 1500)
+            setTimeout(unlimited_weeks.remove_week, 3000)
+        }
+})
 
 $(document).ready(
     function() {
