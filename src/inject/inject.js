@@ -11,7 +11,7 @@ function trigger(event_names, elem) {
     }
     for (let event_name of event_names.split(' ')) {
         let evt = document.createEvent("MouseEvents")
-            // eek, there's gotta be a better way
+        // eek, there's gotta be a better way
         evt.initMouseEvent(event_name, true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
         let dom_elem = elem.get(0)
         dom_elem.dispatchEvent(evt)
@@ -64,7 +64,7 @@ class Toolbar {
             }
         )
 
-        if (this.custom_view.is('.goog-imageless-button-checked')){
+        if (this.custom_view.is('.goog-imageless-button-checked')) {
             this.restore_weeks()
         }
 
@@ -96,8 +96,8 @@ class BigCal {
 }
 
 class MiniCal {
-    constructor(height=6) {
-        // in weeks
+    constructor(height = 6) {
+        // in week rows
         this.height = height
     }
 
@@ -139,8 +139,8 @@ class MiniCal {
         return this.month_start_indexes[0]
     }
     get next_month_start_index() {
-        return this.month_start_indexes[1]
-    }
+            return this.month_start_indexes[1]
+        }
     // current month may start in either first or second row
     get current_month_starts_high() {
         return this.current_month_start_index < 7
@@ -207,12 +207,12 @@ class UnlimitedWeeks {
         return 0
     }
 
-    get_start_cell(){
+    get_start_cell() {
         let index = mini_cal.current_month_start_index + 7
         return mini_cal.nth(index)
     }
 
-    get_end_cell(days_remaining){
+    get_end_cell(days_remaining) {
         let index = days_remaining + mini_cal.current_month_start_index
         return mini_cal.nth(index)
     }
@@ -248,7 +248,9 @@ class UnlimitedWeeks {
         trigger('mousedown mouseup', mini_cal.cell_from_day_num(target_start_day_num))
 
         // preserve number of weeks for next page (re)load
-        chrome.storage.sync.set({'num_weeks': big_cal.num_weeks})
+        chrome.storage.sync.set({
+            'num_weeks': big_cal.num_weeks
+        })
     }
 }
 
@@ -270,7 +272,7 @@ $(document)
             setTimeout(unlimited_weeks.add_week, 1500)
             setTimeout(unlimited_weeks.remove_week, 3000)
         }
-})
+    })
 
 $(document).ready(
     function() {
