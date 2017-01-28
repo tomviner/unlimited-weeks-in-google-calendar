@@ -162,7 +162,7 @@ class MiniCal {
     month_forward() {
         trigger('mousedown mouseup', $('.dp-sb-next'))
     }
-    navigate_to(day_num) {
+    navigate_to_day_num(day_num) {
         let i = 0
         while (day_num < this.first_day_num || this.last_day_num < day_num) {
             if (++i > 10) {
@@ -217,26 +217,8 @@ class UnlimitedWeeks {
         return mini_cal.nth(index)
     }
 
-    set_weeks(weeks_left) {
-        let target_start_day_num = big_cal.first_day_num
-
-        // move to custom view, click doesn't work here
-        trigger('mousedown mouseup', toolbar.custom_view)
-
-        // ensure start date in visible in mini cal
-        mini_cal.navigate_to(target_start_day_num)
-
-        // do a double manoeuvre: click next month during a click drag over the mini calendar.
-        // this is how we reach more than one month
-        trigger('mousedown', this.get_start_cell())
-        let days_remaining = this.allocate_weeks(weeks_left)
-        trigger('mousemove mouseup', this.get_end_cell(days_remaining))
-
-        toolbar.custom_view
-            .find('.goog-imageless-button-content')
-            .text(`${big_cal.num_weeks} weeks`)
-
-        // now move the calandar back to the date it started at
+    move_weeks(start_day_num) {
+        // move the calandar back to the date it started at
 
         // move active range forward, out the way
         mini_cal.month_forward()
@@ -244,13 +226,43 @@ class UnlimitedWeeks {
         trigger('mousedown mouseup', mini_cal.last)
 
         // now click the date we want, in the mini map
-        mini_cal.navigate_to(target_start_day_num)
-        trigger('mousedown mouseup', mini_cal.cell_from_day_num(target_start_day_num))
+        mini_cal.navigate_to_day_num(start_day_num)
+        trigger('mousedown mouseup', mini_cal.cell_from_day_num(start_day_num))
+    }
 
-        // preserve number of weeks for next page (re)load
+    write_custom_button_label() {
+        toolbar.custom_view
+            .find('.goog-imageless-button-content')
+            .text(`${big_cal.num_weeks} weeks`)
+    }
+
+    save_num_weeks() {
         chrome.storage.sync.set({
             'num_weeks': big_cal.num_weeks
         })
+    }
+
+    set_weeks(weeks_left) {
+        let target_start_day_num = big_cal.first_day_num
+
+        // move to custom view, click doesn't work here
+        trigger('mousedown mouseup', toolbar.custom_view)
+
+        // ensure start date in visible in mini cal
+        mini_cal.navigate_to_day_num(target_start_day_num)
+
+        // do a double manoeuvre: click next month during a click drag over the mini calendar.
+        // this is how we reach more than one month
+        trigger('mousedown', this.get_start_cell())
+        let days_remaining = this.allocate_weeks(weeks_left)
+        trigger('mousemove mouseup', this.get_end_cell(days_remaining))
+
+        this.write_custom_button_label()
+
+        this.move_weeks(target_start_day_num)
+
+        // preserve number of weeks for next page (re)load
+        this.save_num_weeks()
     }
 }
 
@@ -259,7 +271,6 @@ let mini_cal = new MiniCal()
 let big_cal = new BigCal()
 let toolbar = new Toolbar()
 let unlimited_weeks = new UnlimitedWeeks()
-
 
 
 $(document)
