@@ -36,6 +36,9 @@ class Toolbar {
     get next_month() {
         return $('#dp_0_next')
     }
+    get is_custom_view_active() {
+        return this.custom_view.is('.goog-imageless-button-checked')
+    }
 
     poll_custom_button_visibility(wait_ms = 500) {
         if (this.custom_view.is(":visible")) {
@@ -64,25 +67,24 @@ class Toolbar {
             }
         )
 
-        if (this.custom_view.is('.goog-imageless-button-checked')) {
-            this.restore_weeks()
+        if (this.is_custom_view_active) {
+            unlimited_weeks.restore_weeks()
         }
 
-        this.custom_view.click(this.restore_weeks)
-    }
-
-    restore_weeks() {
-        chrome.storage.sync.get('num_weeks', function(data) {
-            if (data.num_weeks >= 2) {
-                unlimited_weeks.set_weeks(data.num_weeks)
-            }
+        this.custom_view.click(() => {
+            unlimited_weeks.restore_weeks()
         })
     }
 }
 
 class BigCal {
     get first_day_num() {
+        if (!$('#gridcontainer span[class^="ca-cdp"]').is(':visible')) {
+            // no grid, must be in agenda mode
+            trigger('mousedown mouseup', toolbar.month_view)
+        }
         return parseInt(
+            // take a fresh look, in case it's only just appeared
             $('#gridcontainer span[class^="ca-cdp"]')
             .attr('class')
             .split('ca-cdp')
@@ -185,11 +187,11 @@ class MiniCal {
 
 class UnlimitedWeeks {
     add_week() {
-        this.set_weeks(big_cal.num_weeks + 1)
+        this.alter_weeks(+1)
     }
 
     remove_week() {
-        this.set_weeks(big_cal.num_weeks - 1)
+        this.alter_weeks(-1)
     }
 
     allocate_weeks(weeks_left) {
@@ -242,7 +244,29 @@ class UnlimitedWeeks {
         })
     }
 
-    set_weeks(weeks_left) {
+    alter_weeks(delta) {
+        if (toolbar.is_custom_view_active) {
+            return this.display_weeks(big_cal.num_weeks + delta)
+        }
+        let that = this
+        chrome.storage.sync.get('num_weeks', function(data) {
+            that.display_weeks(data.num_weeks + delta)
+        })
+    }
+
+    restore_weeks() {
+        let that = this
+        chrome.storage.sync.get('num_weeks', function(data) {
+            if (data.num_weeks >= 2) {
+                that.display_weeks(data.num_weeks)
+            }
+        })
+    }
+
+    display_weeks(weeks_left) {
+        if (weeks_left < 2) {
+            weeks_left = 2
+        }
         let target_start_day_num = big_cal.first_day_num
 
         // move to custom view, click doesn't work here
