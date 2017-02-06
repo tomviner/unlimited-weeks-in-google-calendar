@@ -7,8 +7,11 @@
   "author": "Tom Viner",
 
   "icons": {
-    "96": "icons/icon96.png",
-    "128": "icons/icon128.png"
+    "16": "icons/icon-16x16.png",
+    "32": "icons/icon-32x32.png",
+    "48": "icons/icon-48x48.png",
+    "128": "icons/icon-128x128.png",
+    "256": "icons/icon-256x256.png",
   },
   "permissions": [
     "https://calendar.google.com/*",
