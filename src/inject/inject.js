@@ -11,7 +11,9 @@ function trigger(event_names, elem) {
     }
     for (let event_name of event_names.split(' ')) {
         let evt = document.createEvent("MouseEvents")
-        // eek, there's gotta be a better way
+        // eek, there's gotta be a better way.
+        // replace with https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/MouseEvent
+        // https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Creating_and_triggering_events
         evt.initMouseEvent(event_name, true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
         let dom_elem = elem.get(0)
         dom_elem.dispatchEvent(evt)
