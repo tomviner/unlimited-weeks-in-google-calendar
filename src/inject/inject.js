@@ -246,14 +246,14 @@ class UnlimitedWeeks {
     load_num_weeks() {
         // returns a promise
         if (!this.can_persist) {
-            return Promise((resolve, reject) => resolve(null))
+            return Promise((resolve) => resolve(null))
         }
-        return new Promise(function(resolve, reject){
+        return new Promise(function(resolve){
             chrome.storage.sync.get('num_weeks', function(data) {
                 if (
-                    $.isEmptyObject(data)
-                    || typeof data.num_weeks === 'number'
-                    || typeof data.num_weeks >= 2
+                    $.isEmptyObject(data) ||
+                    typeof data.num_weeks === 'number' ||
+                    typeof data.num_weeks >= 2
                 ) {
                     return resolve(data.num_weeks)
                 } else {

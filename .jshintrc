@@ -1,0 +1,15 @@
+{
+  // "esversion": 6,
+  "asi": true ,
+  "browser": true,
+  "jquery": true,
+  "devel": true,
+  "undef": true,
+  "curly": true,
+  "varstmt": true,
+  "maxcomplexity": 10,
+  "maxdepth": 2,
+  "strict": "implied",
+  // "latedef": true,
+  "unused": true
+}
