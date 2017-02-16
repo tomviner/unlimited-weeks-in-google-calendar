@@ -1,5 +1,7 @@
 /* jshint esversion: 6 */
 
+let BUTTON_CHECKED = 'goog-imageless-button-checked'
+
 function trigger(event_names, elem) {
     // event_names: space sep names of events
     // elem: jQuery element
@@ -23,11 +25,14 @@ function trigger(event_names, elem) {
 
 
 class Toolbar {
+    get buttons() {
+        return $('#topRightNavigation .goog-imageless-button')
+    }
     get month_view() {
-        return $('#topRightNavigation .goog-imageless-button').eq(2)
+        return this.buttons.eq(2)
     }
     get custom_view() {
-        return $('#topRightNavigation .goog-imageless-button').eq(3)
+        return this.buttons.eq(3)
     }
     get prev_month() {
         return $('.navBack').eq(0)
@@ -43,7 +48,10 @@ class Toolbar {
     }
 
     poll_custom_button_visibility(wait_ms = 500) {
-        if (this.custom_view.is(":visible")) {
+        if (
+            this.custom_view.is(":visible") &&
+            this.buttons.filter('.goog-imageless-button-checked').is(":visible")
+        ) {
             $(document).trigger("custom_view_buttons_visible")
         } else {
             setTimeout((w) => this.poll_custom_button_visibility(w), wait_ms)
@@ -51,11 +59,11 @@ class Toolbar {
     }
 
     inject_buttons() {
-        this.custom_view.after(
+        toolbar.custom_view.after(
             function() {
                 return $(this)
                     .clone()
-                    .removeClass('goog-imageless-button-checked')
+                    .removeClass(BUTTON_CHECKED)
                     .text('-')
                     .click(() => unlimited_weeks.remove_week())
             }
@@ -63,7 +71,7 @@ class Toolbar {
             function() {
                 return $(this)
                     .clone()
-                    .removeClass('goog-imageless-button-checked')
+                    .removeClass(BUTTON_CHECKED)
                     .text('+')
                     .click(() => unlimited_weeks.add_week())
             }
@@ -71,10 +79,19 @@ class Toolbar {
 
         if (this.is_custom_view_active) {
             unlimited_weeks.restore_weeks()
+        } else {
+            unlimited_weeks.load_num_weeks().then(
+                function(num_weeks) {
+                    unlimited_weeks.write_custom_button_label(num_weeks)
+                })
         }
 
         this.custom_view.click(() => {
             unlimited_weeks.restore_weeks()
+        })
+
+        this.buttons.mousedown(() => {
+            this.buttons.removeClass(BUTTON_CHECKED)
         })
     }
 }
@@ -143,8 +160,8 @@ class MiniCal {
         return this.month_start_indexes[0]
     }
     get next_month_start_index() {
-            return this.month_start_indexes[1]
-        }
+        return this.month_start_indexes[1]
+    }
     // current month may start in either first or second row
     get current_month_starts_high() {
         return this.current_month_start_index < 7
@@ -170,7 +187,7 @@ class MiniCal {
         let i = 0
         while (day_num < this.first_day_num || this.last_day_num < day_num) {
             if (++i > 10) {
-                throw "Too many loops"
+                throw "Too many iterations"
             }
             if (day_num < this.first_day_num) {
                 this.month_backward()
@@ -234,15 +251,41 @@ class UnlimitedWeeks {
         trigger('mousedown mouseup', mini_cal.cell_from_day_num(start_day_num))
     }
 
-    write_custom_button_label() {
+    write_custom_button_label(num_weeks=null) {
         toolbar.custom_view
             .find('.goog-imageless-button-content')
-            .text(`${big_cal.num_weeks} weeks`)
+            .text(`${num_weeks || big_cal.num_weeks} weeks`)
+    }
+
+    can_persist() {
+        return chrome && chrome.storage && chrome.storage.sync
     }
 
     save_num_weeks() {
-        chrome.storage.sync.set({
-            'num_weeks': big_cal.num_weeks
+        if (this.can_persist) {
+            chrome.storage.sync.set({
+                'num_weeks': big_cal.num_weeks
+            })
+        }
+    }
+
+    load_num_weeks() {
+        // returns a promise
+        if (!this.can_persist) {
+            return Promise((resolve, reject) => resolve(null))
+        }
+        return new Promise(function(resolve, reject){
+            chrome.storage.sync.get('num_weeks', function(data) {
+                if (
+                    $.isEmptyObject(data)
+                    || typeof data.num_weeks === 'number'
+                    || typeof data.num_weeks >= 2
+                ) {
+                    return resolve(data.num_weeks)
+                } else {
+                    return resolve(big_cal.num_weeks)
+                }
+            })
         })
     }
 
@@ -251,17 +294,15 @@ class UnlimitedWeeks {
             return this.display_weeks(big_cal.num_weeks + delta)
         }
         let that = this
-        chrome.storage.sync.get('num_weeks', function(data) {
-            that.display_weeks(data.num_weeks + delta)
+        this.load_num_weeks().then(function(num_weeks) {
+            that.display_weeks(num_weeks + delta)
         })
     }
 
     restore_weeks() {
         let that = this
-        chrome.storage.sync.get('num_weeks', function(data) {
-            if (data.num_weeks >= 2) {
-                that.display_weeks(data.num_weeks)
-            }
+        this.load_num_weeks().then(function(num_weeks) {
+            that.display_weeks(num_weeks)
         })
     }
 
@@ -289,6 +330,8 @@ class UnlimitedWeeks {
 
         // preserve number of weeks for next page (re)load
         this.save_num_weeks()
+        toolbar.custom_view.addClass(BUTTON_CHECKED)
+
     }
 }
 
@@ -304,7 +347,6 @@ $(document)
         toolbar.inject_buttons()
         if (demo === true) {
             console.log('demo')
-            // demo
             setTimeout(unlimited_weeks.add_week, 1000)
             setTimeout(unlimited_weeks.add_week, 1500)
             setTimeout(unlimited_weeks.remove_week, 3000)
