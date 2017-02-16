@@ -1,6 +1,7 @@
 /* jshint esversion: 6 */
 
 let BUTTON_CHECKED = 'goog-imageless-button-checked'
+let BUTTON_CONTENT = 'goog-imageless-button-content'
 
 function trigger(event_names, elem) {
     // event_names: space sep names of events
@@ -44,13 +45,13 @@ class Toolbar {
         return $('#dp_0_next')
     }
     get is_custom_view_active() {
-        return this.custom_view.is('.goog-imageless-button-checked')
+        return this.custom_view.is(`.${BUTTON_CHECKED}`)
     }
 
     poll_custom_button_visibility(wait_ms = 500) {
         if (
             this.custom_view.is(":visible") &&
-            this.buttons.filter('.goog-imageless-button-checked').is(":visible")
+            this.buttons.filter(`.${BUTTON_CHECKED}`).is(":visible")
         ) {
             $(document).trigger("custom_view_buttons_visible")
         } else {
@@ -63,19 +64,34 @@ class Toolbar {
             function() {
                 return $(this)
                     .clone()
-                    .removeClass(BUTTON_CHECKED)
-                    .text('-')
+                    .addClass('gcal-unlim-weeks-adjust-weeks')
+                    .addClass('gcal-unlim-weeks-remove-weeks')
+                    .find('.goog-imageless-button-content')
+                        .text('-')
+                    .end()
                     .click(() => unlimited_weeks.remove_week())
+
             }
         ).after(
             function() {
                 return $(this)
                     .clone()
-                    .removeClass(BUTTON_CHECKED)
-                    .text('+')
+                    .addClass('gcal-unlim-weeks-adjust-weeks')
+                    .addClass('gcal-unlim-weeks-add-weeks')
+                    .find('.goog-imageless-button-content')
+                        .text('+')
+                    .end()
                     .click(() => unlimited_weeks.add_week())
             }
         )
+
+        $('.gcal-unlim-weeks-adjust-weeks')
+            .removeClass(BUTTON_CHECKED)
+            // replicate button behavior
+            .mousedown(function(){$(this).addClass('goog-imageless-button-focused')})
+            .mouseup(function(){$(this).removeClass('goog-imageless-button-focused')})
+            .mouseenter(function(){$(this).addClass('goog-imageless-button-hover')})
+            .mouseleave(function(){$(this).removeClass('goog-imageless-button-hover')})
 
         if (this.is_custom_view_active) {
             unlimited_weeks.restore_weeks()
@@ -206,11 +222,52 @@ class MiniCal {
 
 class UnlimitedWeeks {
     add_week() {
+        $('.gcal-unlim-weeks-add-weeks').addClass(BUTTON_CHECKED)
         this.alter_weeks(+1)
     }
 
     remove_week() {
+        $('.gcal-unlim-weeks-remove-weeks').addClass(BUTTON_CHECKED)
         this.alter_weeks(-1)
+    }
+
+    can_persist() {
+        return chrome && chrome.storage && chrome.storage.sync
+    }
+
+    save_num_weeks() {
+        if (this.can_persist) {
+            chrome.storage.sync.set({
+                'num_weeks': big_cal.num_weeks
+            })
+        }
+    }
+
+    load_num_weeks() {
+        // returns a promise
+        if (!this.can_persist) {
+            return Promise((resolve, reject) => resolve(null))
+        }
+        return new Promise(function(resolve, reject){
+            chrome.storage.sync.get('num_weeks', function(data) {
+                if (
+                    $.isEmptyObject(data)
+                    || typeof data.num_weeks === 'number'
+                    || typeof data.num_weeks >= 2
+                ) {
+                    return resolve(data.num_weeks)
+                } else {
+                    return resolve(big_cal.num_weeks)
+                }
+            })
+        })
+    }
+
+    restore_weeks() {
+        let that = this
+        this.load_num_weeks().then(function(num_weeks) {
+            that.display_weeks(num_weeks)
+        })
     }
 
     allocate_weeks(weeks_left) {
@@ -253,40 +310,8 @@ class UnlimitedWeeks {
 
     write_custom_button_label(num_weeks=null) {
         toolbar.custom_view
-            .find('.goog-imageless-button-content')
+            .find(`.${BUTTON_CONTENT}`)
             .text(`${num_weeks || big_cal.num_weeks} weeks`)
-    }
-
-    can_persist() {
-        return chrome && chrome.storage && chrome.storage.sync
-    }
-
-    save_num_weeks() {
-        if (this.can_persist) {
-            chrome.storage.sync.set({
-                'num_weeks': big_cal.num_weeks
-            })
-        }
-    }
-
-    load_num_weeks() {
-        // returns a promise
-        if (!this.can_persist) {
-            return Promise((resolve, reject) => resolve(null))
-        }
-        return new Promise(function(resolve, reject){
-            chrome.storage.sync.get('num_weeks', function(data) {
-                if (
-                    $.isEmptyObject(data)
-                    || typeof data.num_weeks === 'number'
-                    || typeof data.num_weeks >= 2
-                ) {
-                    return resolve(data.num_weeks)
-                } else {
-                    return resolve(big_cal.num_weeks)
-                }
-            })
-        })
     }
 
     alter_weeks(delta) {
@@ -296,13 +321,6 @@ class UnlimitedWeeks {
         let that = this
         this.load_num_weeks().then(function(num_weeks) {
             that.display_weeks(num_weeks + delta)
-        })
-    }
-
-    restore_weeks() {
-        let that = this
-        this.load_num_weeks().then(function(num_weeks) {
-            that.display_weeks(num_weeks)
         })
     }
 
@@ -332,6 +350,7 @@ class UnlimitedWeeks {
         this.save_num_weeks()
         toolbar.custom_view.addClass(BUTTON_CHECKED)
 
+        $('.gcal-unlim-weeks-adjust-weeks').removeClass(BUTTON_CHECKED)
     }
 }
 
