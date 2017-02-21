@@ -6,6 +6,11 @@ export name=$(jq --raw-output '.name | gsub(" "; "-") | gsub("™"; "") | ascii_
 export version=$(jq --raw-output '.version' manifest.json)
 
 mkdir -p 'dist'
-apack "dist/${name:?}-${version:?}.zip" . -- --exclude '/.*' '/dist/*'
+
+zip_file="dist/${name:?}-${version:?}.zip"
+rm -f "${zip_file:-}"
+
+apack "${zip_file:-}" . -- \
+    --exclude '/.*' '/dist/*' '/*.sh' '/*.md' '/assets/*'
 
 echo "Publish at https://chrome.google.com/webstore/developer/dashboard"

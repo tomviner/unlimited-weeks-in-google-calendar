@@ -1,6 +1,6 @@
 {
   "name": "Unlimited weeks in Google Calendar™",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "manifest_version": 2,
   "description": "Display as many weeks in Google Calendar™ as your screen can handle",
   "homepage_url": "https://github.com/tomviner/unlimited-weeks-in-google-calendar",
@@ -27,12 +27,5 @@
         "src/inject/inject.js"
       ]
     }
-  ],
-
-  "applications": {
-    "gecko": {
-      "id": "unlimited-weeks-in-google-calendar@example.com",
-      "strict_min_version": "42.0"
-    }
-  }
+  ]
 }
