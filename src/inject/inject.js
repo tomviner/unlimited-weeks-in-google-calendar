@@ -231,7 +231,7 @@ class UnlimitedWeeks {
         this.alter_weeks(-1)
     }
 
-    can_persist() {
+    get can_persist() {
         return chrome && chrome.storage && chrome.storage.sync
     }
 
@@ -246,7 +246,7 @@ class UnlimitedWeeks {
     load_num_weeks() {
         // returns a promise
         if (!this.can_persist) {
-            return Promise((resolve) => resolve(null))
+            return new Promise((resolve) => resolve(null))
         }
         return new Promise(function(resolve){
             chrome.storage.sync.get('num_weeks', function(data) {
@@ -264,10 +264,9 @@ class UnlimitedWeeks {
     }
 
     restore_weeks() {
-        let that = this
-        this.load_num_weeks().then(function(num_weeks) {
-            that.display_weeks(num_weeks)
-        })
+        this.load_num_weeks().then(
+            num_weeks => this.display_weeks(num_weeks)
+        )
     }
 
     allocate_weeks(weeks_left) {
