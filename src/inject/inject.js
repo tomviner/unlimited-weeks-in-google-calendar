@@ -246,7 +246,7 @@ class UnlimitedWeeks {
     load_num_weeks() {
         // returns a promise
         if (!this.can_persist) {
-            return new Promise((resolve) => resolve(null))
+            return new Promise((resolve) => resolve(big_cal.num_weeks))
         }
         return new Promise(function(resolve){
             chrome.storage.sync.get('num_weeks', function(data) {
