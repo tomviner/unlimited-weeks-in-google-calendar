@@ -35,15 +35,6 @@ class Toolbar {
     get custom_view() {
         return this.buttons.eq(3)
     }
-    get prev_month() {
-        return $('.navBack').eq(0)
-    }
-    get today() {
-        return $('#todayButton\\:1,#todayButton\\:2').children().eq(0)
-    }
-    get next_month() {
-        return $('#dp_0_next')
-    }
     get is_custom_view_active() {
         return this.custom_view.is(`.${BUTTON_CHECKED}`)
     }
