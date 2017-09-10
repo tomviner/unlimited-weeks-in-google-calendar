@@ -3,25 +3,23 @@
 let BUTTON_CHECKED = 'goog-imageless-button-checked'
 let BUTTON_CONTENT = 'goog-imageless-button-content'
 
-function trigger(event_names, elem) {
-    // event_names: space sep names of events
-    // elem: jQuery element
+/** Trigger mouse events on jQuery elements.
+  * event_names: space separated names of mouse events
+  * jq_element: jQuery element
+  */
+function trigger(event_names, jq_element) {
     if (!event_names || event_names.length === 0) {
-        throw (`Cannot trigger ${event_names}, element event_names`)
+        throw (`Cannot trigger events for ${jq_element}, event_names empty`)
     }
-    if (!elem || elem.length === 0) {
+    if (!jq_element || jq_element.length === 0) {
         throw (`Cannot trigger ${event_names}, element missing`)
     }
     for (let event_name of event_names.split(' ')) {
-        let evt = document.createEvent("MouseEvents")
-        // eek, there's gotta be a better way.
-        // replace with https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/MouseEvent
-        // https://developer.mozilla.org/en-US/docs/Web/Guide/Events/Creating_and_triggering_events
-        evt.initMouseEvent(event_name, true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
-        let dom_elem = elem.get(0)
-        dom_elem.dispatchEvent(evt)
+        let evt = new MouseEvent(event_name, {bubbles: true})
+        let dom_element = jq_element.get(0)
+        dom_element.dispatchEvent(evt)
     }
-    return elem
+    return jq_element
 }
 
 
