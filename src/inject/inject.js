@@ -23,6 +23,9 @@ function trigger(event_names, jq_element) {
 }
 
 
+/** Represents the buttons above the big calendar.
+  * e.g. Today, Prev, Next, Day, Week, Month, Custom, Agenda.
+  */
 class Toolbar {
     get buttons() {
         return $('#topRightNavigation .goog-imageless-button')
@@ -49,13 +52,13 @@ class Toolbar {
     }
 
     inject_buttons() {
-        toolbar.custom_view.after(
+        this.custom_view.after(
             function() {
                 return $(this)
                     .clone()
                     .addClass('gcal-unlim-weeks-adjust-weeks')
-                    .addClass('gcal-unlim-weeks-remove-weeks')
-                    .find('.goog-imageless-button-content')
+                    .addClass('gcal-unlim-weeks-remove-week')
+                    .find(`.${BUTTON_CONTENT}`)
                         .text('-')
                     .end()
                     .click(() => unlimited_weeks.remove_week())
@@ -66,8 +69,8 @@ class Toolbar {
                 return $(this)
                     .clone()
                     .addClass('gcal-unlim-weeks-adjust-weeks')
-                    .addClass('gcal-unlim-weeks-add-weeks')
-                    .find('.goog-imageless-button-content')
+                    .addClass('gcal-unlim-weeks-add-week')
+                    .find(`.${BUTTON_CONTENT}`)
                         .text('+')
                     .end()
                     .click(() => unlimited_weeks.add_week())
@@ -101,7 +104,13 @@ class Toolbar {
     }
 }
 
+/** Represents the main calendar. */
 class BigCal {
+    /** Google Calendar labels each day with a number as follows:
+      * 512 * (year - 1970) + 32 * month + day
+      * (assuming 1-indexed months and days)
+      * we call this the "day_num"
+      */
     get first_day_num() {
         if (!$('#gridcontainer span[class^="ca-cdp"]').is(':visible')) {
             // no grid, must be in agenda mode
@@ -110,9 +119,9 @@ class BigCal {
         return parseInt(
             // take a fresh look, in case it's only just appeared
             $('#gridcontainer span[class^="ca-cdp"]')
-            .attr('class')
-            .split('ca-cdp')
-            .slice(-1)[0]
+                .attr('class')
+                .split('ca-cdp')
+                .slice(-1)[0]
         )
     }
 
@@ -121,6 +130,7 @@ class BigCal {
     }
 }
 
+/** Represents the small calendar shown at the top left. */
 class MiniCal {
     constructor(height = 6) {
         // in week rows
@@ -140,8 +150,6 @@ class MiniCal {
         return this.nth(7 * this.height - 1)
     }
     extract_day_num(el) {
-        // Google Calendar seems to label each day with a monotonic number
-        // that skips in an unknown way
         return parseInt(el.eq(0).attr('id').split('_').slice(-1)[0])
     }
     get first_day_num() {
@@ -150,9 +158,9 @@ class MiniCal {
     get last_day_num() {
         return this.extract_day_num(this.last)
     }
+    /** Return the positions of the 1st day of the current
+      * and next months. */
     get month_start_indexes() {
-        // return the positions of the 1st of the current
-        // and next months
         return this.cells.map((i, el) => {
             if ($(el).text() === '1') {
                 return i
@@ -167,11 +175,11 @@ class MiniCal {
     get next_month_start_index() {
         return this.month_start_indexes[1]
     }
-    // current month may start in either first or second row
+    /** current month may start in either first or second row */
     get current_month_starts_high() {
         return this.current_month_start_index < 7
     }
-    // next month may start in either last or penultimate row
+    /** next month may start in either last or penultimate row */
     get next_month_starts_low() {
         return this.next_month_start_index >= 7 * (this.height - 1)
     }
@@ -209,42 +217,55 @@ class MiniCal {
 }
 
 
+let sync_key = 'gcal-unlim-weeks-num-weeks'
+
+/** Key operations of the extention. */
 class UnlimitedWeeks {
     add_week() {
-        $('.gcal-unlim-weeks-add-weeks').addClass(BUTTON_CHECKED)
+        $('.gcal-unlim-weeks-add-week').addClass(BUTTON_CHECKED)
         this.alter_weeks(+1)
     }
 
     remove_week() {
-        $('.gcal-unlim-weeks-remove-weeks').addClass(BUTTON_CHECKED)
+        $('.gcal-unlim-weeks-remove-week').addClass(BUTTON_CHECKED)
         this.alter_weeks(-1)
     }
 
+    alter_weeks(delta) {
+        if (toolbar.is_custom_view_active) {
+            return this.display_weeks(big_cal.num_weeks + delta)
+        }
+        let that = this
+        this.load_num_weeks().then(num_weeks => {
+            that.display_weeks(num_weeks + delta)
+        })
+    }
+
     get can_persist() {
-        return chrome && chrome.storage && chrome.storage.sync
+        return typeof chrome === 'object' && chrome.storage && chrome.storage.sync
     }
 
     save_num_weeks() {
         if (this.can_persist) {
             chrome.storage.sync.set({
-                'num_weeks': big_cal.num_weeks
+                [sync_key]: big_cal.num_weeks
             })
         }
     }
 
+    /** returns a promise */
     load_num_weeks() {
-        // returns a promise
         if (!this.can_persist) {
             return new Promise((resolve) => resolve(big_cal.num_weeks))
         }
         return new Promise(function(resolve){
-            chrome.storage.sync.get('num_weeks', function(data) {
+            chrome.storage.sync.get(sync_key, function(data) {
                 if (
-                    $.isEmptyObject(data) ||
-                    typeof data.num_weeks === 'number' ||
-                    typeof data.num_weeks >= 2
+                    !$.isEmptyObject(data) &&
+                    typeof data[sync_key] === 'number' &&
+                    data[sync_key] >= 2
                 ) {
-                    return resolve(data.num_weeks)
+                    return resolve(data[sync_key])
                 } else {
                     return resolve(big_cal.num_weeks)
                 }
@@ -283,8 +304,8 @@ class UnlimitedWeeks {
         return mini_cal.nth(index)
     }
 
+    /** move the calandar back to the date it started at */
     move_weeks(start_day_num) {
-        // move the calandar back to the date it started at
 
         // move active range forward, out the way
         mini_cal.month_forward()
@@ -300,16 +321,6 @@ class UnlimitedWeeks {
         toolbar.custom_view
             .find(`.${BUTTON_CONTENT}`)
             .text(`${num_weeks || big_cal.num_weeks} weeks`)
-    }
-
-    alter_weeks(delta) {
-        if (toolbar.is_custom_view_active) {
-            return this.display_weeks(big_cal.num_weeks + delta)
-        }
-        let that = this
-        this.load_num_weeks().then(function(num_weeks) {
-            that.display_weeks(num_weeks + delta)
-        })
     }
 
     display_weeks(weeks_left) {
@@ -354,9 +365,9 @@ $(document)
         toolbar.inject_buttons()
         if (demo === true) {
             console.log('demo')
-            setTimeout(unlimited_weeks.add_week, 1000)
-            setTimeout(unlimited_weeks.add_week, 1500)
-            setTimeout(unlimited_weeks.remove_week, 3000)
+            setTimeout(() => unlimited_weeks.add_week(), 1000)
+            setTimeout(() => unlimited_weeks.add_week(), 1500)
+            setTimeout(() => unlimited_weeks.remove_week(), 3000)
         }
     })
 
