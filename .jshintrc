@@ -4,9 +4,6 @@
   "browser": true,
   "jquery": true,
   "devel": true,
-  "predef": [
-    "chrome"
-  ],
   "undef": true,
   "curly": true,
   "varstmt": true,

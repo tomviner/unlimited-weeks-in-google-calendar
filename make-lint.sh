@@ -1,3 +1,3 @@
 # Requirements:
 #   npm install -g jshint
-jshint src/inject/inject.js
+jshint ext/src/inject/inject.js
