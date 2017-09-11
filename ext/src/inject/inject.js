@@ -47,7 +47,7 @@ class Toolbar {
         ) {
             $(document).trigger("custom_view_buttons_visible")
         } else {
-            setTimeout((w) => this.poll_custom_button_visibility(w), wait_ms)
+            setTimeout(w => this.poll_custom_button_visibility(w), wait_ms)
         }
     }
 
@@ -256,7 +256,7 @@ class UnlimitedWeeks {
     /** returns a promise */
     load_num_weeks() {
         if (!this.can_persist) {
-            return new Promise((resolve) => resolve(big_cal.num_weeks))
+            return new Promise(resolve => resolve(big_cal.num_weeks))
         }
         return new Promise(function(resolve){
             chrome.storage.sync.get(sync_key, function(data) {

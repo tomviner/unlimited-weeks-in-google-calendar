@@ -53,7 +53,7 @@ def test_ext(selenium):
     authed_get(selenium, CALENDAR_URL)
 
     if HEADLESS:
-        # extentions cannot be loaded in headless mode so run scripts directly
+        # extensions cannot be loaded in headless mode so run scripts directly
         time.sleep(1)
         jquery_js = open('ext/src/inject/jquery.min.js').read()
         selenium.execute_script(jquery_js)
