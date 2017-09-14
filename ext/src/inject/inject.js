@@ -51,53 +51,34 @@ class Toolbar {
         }
     }
 
-    inject_buttons() {
-        this.custom_view.after(
-            function() {
-                return $(this)
-                    .clone()
-                    .addClass('gcal-unlim-weeks-adjust-weeks')
-                    .addClass('gcal-unlim-weeks-remove-week')
-                    .find(`.${BUTTON_CONTENT}`)
-                        .text('-')
-                    .end()
-                    .click(() => unlimited_weeks.remove_week())
+    make_button(adjustment, text, handler) {
+        return this.custom_view
+            .clone()
+            .addClass('gcal-unlim-weeks-adjust-weeks')
+            .addClass(`gcal-unlim-weeks-${adjustment}-week`)
+            .find(`.${BUTTON_CONTENT}`)
+                .text(text)
+            .end()
+            .click(handler)
+    }
 
-            }
-        ).after(
-            function() {
-                return $(this)
-                    .clone()
-                    .addClass('gcal-unlim-weeks-adjust-weeks')
-                    .addClass('gcal-unlim-weeks-add-week')
-                    .find(`.${BUTTON_CONTENT}`)
-                        .text('+')
-                    .end()
-                    .click(() => unlimited_weeks.add_week())
-            }
-        )
+    inject_buttons(add_handler, remove_handler) {
+        let add_button = this.make_button('add', '+', add_handler)
+        let remove_button = this.make_button('remove', '-', remove_handler)
 
-        $('.gcal-unlim-weeks-adjust-weeks')
+        this.custom_view
+            .after(remove_button)
+            .after(add_button)
+
+        add_button.add(remove_button)
             .removeClass(BUTTON_CHECKED)
-            // replicate button behavior
+            // replicate existing button behavior
             .mousedown(function(){$(this).addClass('goog-imageless-button-focused')})
             .mouseup(function(){$(this).removeClass('goog-imageless-button-focused')})
             .mouseenter(function(){$(this).addClass('goog-imageless-button-hover')})
             .mouseleave(function(){$(this).removeClass('goog-imageless-button-hover')})
 
-        if (this.is_custom_view_active) {
-            unlimited_weeks.restore_weeks()
-        } else {
-            unlimited_weeks.load_num_weeks().then(
-                function(num_weeks) {
-                    unlimited_weeks.write_custom_button_label(num_weeks)
-                })
-        }
-
-        this.custom_view.click(() => {
-            unlimited_weeks.restore_weeks()
-        })
-
+        // prevent buttons getting stuck in clicked position
         this.buttons.mousedown(() => {
             this.buttons.removeClass(BUTTON_CHECKED)
         })
@@ -106,19 +87,27 @@ class Toolbar {
 
 /** Represents the main calendar. */
 class BigCal {
+    get date_labels() {
+        return $('#gridcontainer span[class^="ca-cdp"]')
+    }
+    get is_active() {
+        return this.date_labels.is(':visible')
+    }
+
     /** Google Calendar labels each day with a number as follows:
       * 512 * (year - 1970) + 32 * month + day
       * (assuming 1-indexed months and days)
       * we call this the "day_num"
       */
     get first_day_num() {
-        if (!$('#gridcontainer span[class^="ca-cdp"]').is(':visible')) {
+        let date_labels = this.date_labels
+        if (!date_labels.is(':visible')) {
             // no grid, must be in agenda mode
-            trigger('mousedown mouseup', toolbar.month_view)
+            throw("do not call this method while in agenda mode")
         }
+        // i.e. class="ca-cdp24364"
         return parseInt(
-            // take a fresh look, in case it's only just appeared
-            $('#gridcontainer span[class^="ca-cdp"]')
+            date_labels
                 .attr('class')
                 .split('ca-cdp')
                 .slice(-1)[0]
@@ -219,8 +208,32 @@ class MiniCal {
 
 let sync_key = 'gcal-unlim-weeks-num-weeks'
 
-/** Key operations of the extention. */
+/** Key operations of the extension. */
 class UnlimitedWeeks {
+    setup() {
+        if (this.already_setup === true){
+            return
+        }
+        this.already_setup = true
+
+        toolbar.inject_buttons(
+            () => this.add_week(),
+            () => this.remove_week()
+        )
+
+        if (toolbar.is_custom_view_active) {
+            this.restore_weeks()
+        } else {
+            this.load_num_weeks().then(num_weeks =>
+                this.write_custom_button_label(num_weeks)
+            )
+        }
+
+        toolbar.custom_view.click(() => {
+            this.restore_weeks()
+        })
+    }
+
     add_week() {
         $('.gcal-unlim-weeks-add-week').addClass(BUTTON_CHECKED)
         this.alter_weeks(+1)
@@ -233,12 +246,22 @@ class UnlimitedWeeks {
 
     alter_weeks(delta) {
         if (toolbar.is_custom_view_active) {
-            return this.display_weeks(big_cal.num_weeks + delta)
+            this.display_weeks(big_cal.num_weeks + delta)
+        } else {
+            if (!big_cal.is_active) {
+                // probably in agenda mode
+                trigger('mousedown mouseup', toolbar.custom_view)
+            }
+            this.load_num_weeks().then(num_weeks => {
+                this.display_weeks(num_weeks + delta)
+            })
         }
-        let that = this
-        this.load_num_weeks().then(num_weeks => {
-            that.display_weeks(num_weeks + delta)
-        })
+    }
+
+    restore_weeks() {
+        this.load_num_weeks().then(
+            num_weeks => this.display_weeks(num_weeks)
+        )
     }
 
     get can_persist() {
@@ -271,12 +294,6 @@ class UnlimitedWeeks {
                 }
             })
         })
-    }
-
-    restore_weeks() {
-        this.load_num_weeks().then(
-            num_weeks => this.display_weeks(num_weeks)
-        )
     }
 
     allocate_weeks(weeks_left) {
@@ -347,13 +364,12 @@ class UnlimitedWeeks {
 
         // preserve number of weeks for next page (re)load
         this.save_num_weeks()
-        toolbar.custom_view.addClass(BUTTON_CHECKED)
 
+        toolbar.custom_view.addClass(BUTTON_CHECKED)
         $('.gcal-unlim-weeks-adjust-weeks').removeClass(BUTTON_CHECKED)
     }
 }
 
-let demo = false
 let mini_cal = new MiniCal()
 let big_cal = new BigCal()
 let toolbar = new Toolbar()
@@ -362,17 +378,10 @@ let unlimited_weeks = new UnlimitedWeeks()
 
 $(document)
     .on("custom_view_buttons_visible", function() {
-        toolbar.inject_buttons()
-        if (demo === true) {
-            console.log('demo')
-            setTimeout(() => unlimited_weeks.add_week(), 1000)
-            setTimeout(() => unlimited_weeks.add_week(), 1500)
-            setTimeout(() => unlimited_weeks.remove_week(), 3000)
-        }
+        unlimited_weeks.setup()
     })
 
-$(document).ready(
-    function() {
-        // triggers custom_view_buttons_visible event
-        toolbar.poll_custom_button_visibility()
-    })
+$(document).ready(function() {
+    // triggers custom_view_buttons_visible event
+    toolbar.poll_custom_button_visibility()
+})
