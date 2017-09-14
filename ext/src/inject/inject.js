@@ -286,7 +286,7 @@ class UnlimitedWeeks {
                 if (
                     !$.isEmptyObject(data) &&
                     typeof data[sync_key] === 'number' &&
-                    data[sync_key] >= 2
+                    data[sync_key] >= 1
                 ) {
                     return resolve(data[sync_key])
                 } else {
@@ -375,13 +375,24 @@ let big_cal = new BigCal()
 let toolbar = new Toolbar()
 let unlimited_weeks = new UnlimitedWeeks()
 
-
+console.log('start')
 $(document)
     .on("custom_view_buttons_visible", function() {
+        console.log('.on custom_view_buttons_visible: setup')
         unlimited_weeks.setup()
+        console.log('.on custom_view_buttons_visible: finished')
     })
 
 $(document).ready(function() {
     // triggers custom_view_buttons_visible event
+    console.log('doc ready: poll')
     toolbar.poll_custom_button_visibility()
+    console.log('doc ready: finished')
 })
+console.log('end')
+/*
+poll_custom_button_visibility
+custom_view_buttons_visible
+unlimited_weeks.setup()
+toolbar.inject_buttons()
+*/
