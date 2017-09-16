@@ -10,4 +10,4 @@ install:
   - pip install pytest
   - pip install pytest-selenium
 script:
-  - pytest tests/ --chrome
+  - pytest --driver=Chrome tests/
