@@ -19,6 +19,7 @@ def authed_get(selenium, url):
             '[type=email]').send_keys(EMAIL + Keys.ENTER)
         selenium.find_element_by_css_selector(
             '[type=password][name=password]').send_keys(PASSWORD + Keys.ENTER)
+    time.sleep(2)
     assert not selenium.current_url.startswith(LOGIN_URL)
 
 def get_num_weeks(selenium):
