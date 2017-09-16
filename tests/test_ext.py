@@ -20,6 +20,8 @@ def authed_get(selenium, url):
         selenium.find_element_by_css_selector(
             '[type=password][name=password]').send_keys(PASSWORD + Keys.ENTER)
     time.sleep(2)
+    html = selenium.execute_script("return document.documentElement.outerHTML")
+    print(html)
     assert not selenium.current_url.startswith(LOGIN_URL)
 
 def get_num_weeks(selenium):
