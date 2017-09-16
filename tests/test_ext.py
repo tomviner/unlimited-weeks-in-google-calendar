@@ -9,8 +9,8 @@ PASSWORD = os.environ['GOOGLE_PASSWORD']
 CALENDAR_URL = 'https://calendar.google.com/calendar'
 LOGIN_URL = 'https://accounts.google.com/signin/v2/identifier'
 EXT_PATH = 'ext/'
-HEADLESS = True
-CACHE_AUTH = True
+HEADLESS = False
+CACHE_AUTH = False
 
 
 @pytest.fixture
