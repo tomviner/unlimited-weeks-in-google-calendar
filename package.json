@@ -1,8 +1,10 @@
 {
   "name": "Unlimited-weeks-in-Google-Calendar",
-  "version": "0.1.0",
+  "repository": "github:tomviner/unlimited-weeks-in-google-calendar",
+  "license": "MIT",
   "devDependencies": {
     "grunt": "^1.0.1",
+    "grunt-commands": "^0.1.8",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-jshint": "^1.1.0",
     "grunt-contrib-uglify": "git://github.com/gruntjs/grunt-contrib-uglify.git#harmony",

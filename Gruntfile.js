@@ -52,7 +52,13 @@ module.exports = function(grunt) {
                 "strict": "implied",
                 "unused": true
             }
-        }
+        },
+
+        commands: {
+            run_shell: {
+                cmd: './make-package.sh'
+            },
+        },
 
     });
 
@@ -61,9 +67,11 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-commands');
 
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
     grunt.registerTask('default', ['jshint', 'concat', 'uglify']);
     grunt.registerTask('dev', ['watch']);
+    grunt.registerTask('build', ['commands']);
 
 };
