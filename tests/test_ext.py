@@ -22,7 +22,7 @@ def authed_get(selenium, url):
     time.sleep(2)
     if not selenium.current_url.startswith(LOGIN_URL):
         return
-    confirm = selenium.get_element_by_xpath('//ul[1]/li[3]')
+    confirm = selenium.find_element_by_xpath('//ul[1]/li[3]')
     print(confirm)
     confirm.click()
     time.sleep(2)
