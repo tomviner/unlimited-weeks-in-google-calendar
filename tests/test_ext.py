@@ -5,6 +5,7 @@ from selenium.webdriver.common.keys import Keys
 
 EMAIL = os.environ['GOOGLE_USERNAME']
 PASSWORD = os.environ['GOOGLE_PASSWORD']
+PHONE = os.environ['GOOGLE_PHONE']
 CALENDAR_URL = 'https://calendar.google.com/calendar'
 LOGIN_URL = 'https://accounts.google.com/signin'
 EXT_PATH = 'ext/'
@@ -22,10 +23,18 @@ def authed_get(selenium, url):
     time.sleep(2)
     if not selenium.current_url.startswith(LOGIN_URL):
         return
+
     confirm = selenium.find_element_by_xpath('//ul[1]/li[3]')
     print(confirm)
     confirm.click()
     time.sleep(2)
+
+    inp = selenium.find_element_by_id('phoneNumberId')
+    inp.send_keys(PHONE + Keys.ENTER)
+    time.sleep(2)
+
+    if not selenium.current_url.startswith(LOGIN_URL):
+        return
     html = selenium.execute_script("return document.documentElement.outerHTML")
     print(html)
     assert not selenium.current_url.startswith(LOGIN_URL)
