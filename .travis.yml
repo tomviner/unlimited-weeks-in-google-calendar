@@ -9,5 +9,6 @@ python:
 install:
   - pip install pytest
   - pip install pytest-selenium
+  - pip install chromedriver-installer
 script:
   - pytest --driver=Chrome tests/
