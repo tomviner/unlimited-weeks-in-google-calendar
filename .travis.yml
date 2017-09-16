@@ -17,6 +17,6 @@ before_script:
   - sleep 3 # give xvfb some time to start
 
 after_failure:
-  - "for i in .log/*.html; do echo $i; cat "$i"; echo "EOF"; done"
-  - "for i in .log/assets/*.txt; do echo $i; cat "$i"; echo "EOF"; done"
-  - "for i in .log/assets/*.png; do echo $i; base64 "$i"; echo "EOF"; done"
+  - 'for i in .log/*.html; do echo $i; cat "$i"; echo EOF; done'
+  - 'for i in .log/assets/*.txt; do echo $i; cat "$i"; echo EOF; done'
+  - 'for i in .log/assets/*.png; do echo $i; base64 "$i"; echo EOF; done'
