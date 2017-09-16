@@ -9,7 +9,7 @@ python:
 install:
   - pip install pytest pytest-selenium chromedriver-installer
 script:
-  - pytest --driver=Chrome tests/
+  - pytest
 
 before_script:
   - "export DISPLAY=:99.0"

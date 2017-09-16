@@ -1,40 +1,15 @@
 import os
 import time
 
-import pytest
 from selenium.webdriver.common.keys import Keys
 
 EMAIL = os.environ['GOOGLE_USERNAME']
 PASSWORD = os.environ['GOOGLE_PASSWORD']
 CALENDAR_URL = 'https://calendar.google.com/calendar'
-LOGIN_URL = 'https://accounts.google.com/signin/v2/identifier'
+LOGIN_URL = 'https://accounts.google.com/signin'
 EXT_PATH = 'ext/'
-HEADLESS = False
+HEADLESS = True
 CACHE_AUTH = False
-
-
-@pytest.fixture
-def chrome_options(request, chrome_options):
-    if CACHE_AUTH:
-        profile_dir = request.config.cache.makedir('gcal-unlim-weeks')
-        chrome_options.add_argument("user-data-dir={}".format(profile_dir))
-
-    chrome_options.add_argument("--verbose")
-
-    # do not allow popup notifications
-    chrome_options.add_experimental_option("prefs", {
-        "profile.default_content_setting_values.notifications": 2})
-    if HEADLESS:
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--disable-gpu")
-    else:
-        chrome_options.add_argument("--load-extension={}".format(EXT_PATH))
-    return chrome_options
-
-@pytest.fixture
-def selenium(selenium):
-    selenium.implicitly_wait(3)
-    return selenium
 
 
 def authed_get(selenium, url):
@@ -44,6 +19,7 @@ def authed_get(selenium, url):
             '[type=email]').send_keys(EMAIL + Keys.ENTER)
         selenium.find_element_by_css_selector(
             '[type=password][name=password]').send_keys(PASSWORD + Keys.ENTER)
+    assert not selenium.current_url.startswith(LOGIN_URL)
 
 def get_num_weeks(selenium):
     weeks = selenium.find_elements_by_class_name('month-row')
