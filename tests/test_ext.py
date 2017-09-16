@@ -20,6 +20,12 @@ def authed_get(selenium, url):
         selenium.find_element_by_css_selector(
             '[type=password][name=password]').send_keys(PASSWORD + Keys.ENTER)
     time.sleep(2)
+    if not selenium.current_url.startswith(LOGIN_URL):
+        return
+    confirm = selenium.get_element_by_xpath('//ul[1]/li[3]')
+    print(confirm)
+    confirm.click()
+    time.sleep(2)
     html = selenium.execute_script("return document.documentElement.outerHTML")
     print(html)
     assert not selenium.current_url.startswith(LOGIN_URL)
