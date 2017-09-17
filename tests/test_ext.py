@@ -3,14 +3,13 @@ import time
 
 from selenium.webdriver.common.keys import Keys
 
+from conftest import HEADLESS
+
 EMAIL = os.environ['GOOGLE_USERNAME']
 PASSWORD = os.environ['GOOGLE_PASSWORD']
 PHONE = os.environ['GOOGLE_PHONE']
 CALENDAR_URL = 'https://calendar.google.com/calendar'
 LOGIN_URL = 'https://accounts.google.com/signin'
-EXT_PATH = 'ext/'
-HEADLESS = True
-CACHE_AUTH = False
 
 
 def authed_get(selenium, url):
