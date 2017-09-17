@@ -30,7 +30,15 @@ def authed_get(selenium, url):
     time.sleep(2)
 
     inp = selenium.find_element_by_id('phoneNumberId')
-    inp.send_keys(PHONE + Keys.ENTER)
+    inp.click()
+    time.sleep(1)
+
+    inp.send_keys(PHONE)
+    time.sleep(2)
+
+    nxt = selenium.find_element_by_id('next')
+    nxt.click()
+
     time.sleep(2)
 
     if not selenium.current_url.startswith(LOGIN_URL):
