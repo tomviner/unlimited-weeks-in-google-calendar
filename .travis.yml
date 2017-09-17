@@ -1,4 +1,9 @@
 dist: trusty
+
+cache:
+  directories:
+  - .cache
+
 addons:
   chrome: stable
 
