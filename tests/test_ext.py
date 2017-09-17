@@ -21,6 +21,9 @@ def authed_get(selenium, url):
         selenium.find_element_by_css_selector(
             '[type=password][name=password]').send_keys(PASSWORD + Keys.ENTER)
     time.sleep(2)
+    i = 0
+    print('qwerty')
+    i += 1; print(i)
     if not selenium.current_url.startswith(LOGIN_URL):
         return
 
@@ -28,21 +31,36 @@ def authed_get(selenium, url):
     print(confirm)
     confirm.click()
     time.sleep(2)
+    i += 1; print(i)
+
+    if not selenium.current_url.startswith(LOGIN_URL):
+        return
 
     inp = selenium.find_element_by_id('phoneNumberId')
     inp.click()
     time.sleep(1)
+    i += 1; print(i)
+
+    if not selenium.current_url.startswith(LOGIN_URL):
+        return
 
     inp.send_keys(PHONE)
     time.sleep(2)
+    i += 1; print(i)
+
+    if not selenium.current_url.startswith(LOGIN_URL):
+        return
 
     nxt = selenium.find_element_by_id('next')
     nxt.click()
 
     time.sleep(2)
+    i += 1; print(i)
 
     if not selenium.current_url.startswith(LOGIN_URL):
         return
+
+    i += 1; print(i)
     html = selenium.execute_script("return document.documentElement.outerHTML")
     print(html)
     assert not selenium.current_url.startswith(LOGIN_URL)
