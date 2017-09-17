@@ -13,6 +13,9 @@ LOGIN_URL = 'https://accounts.google.com/signin'
 
 
 def authed_get(selenium, url):
+    i = 0
+    print('qwerty')
+    i += 1; print(i)
     selenium.get(url)
     if selenium.current_url.startswith(LOGIN_URL):
         selenium.find_element_by_css_selector(
@@ -20,8 +23,6 @@ def authed_get(selenium, url):
         selenium.find_element_by_css_selector(
             '[type=password][name=password]').send_keys(PASSWORD + Keys.ENTER)
     time.sleep(2)
-    i = 0
-    print('qwerty')
     i += 1; print(i)
     if not selenium.current_url.startswith(LOGIN_URL):
         return
