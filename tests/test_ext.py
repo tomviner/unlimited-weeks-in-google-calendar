@@ -77,7 +77,7 @@ def test_ext(selenium):
         time.sleep(1)
         jquery_js = open('ext/src/inject/jquery.min.js').read()
         selenium.execute_script(jquery_js)
-        inject_js = open('ext/src/inject/inject.js').read()
+        inject_js = open('ext/src/inject/compiled.js').read()
         selenium.execute_script(inject_js)
         time.sleep(1)
 

@@ -1,4 +1,5 @@
-gcal-unlimited-weeks.zip
+ext/src/inject/compiled.js
+ext/src/inject/compiled.min.js
 
 node_modules/
 

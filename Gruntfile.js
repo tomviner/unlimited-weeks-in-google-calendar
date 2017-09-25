@@ -5,11 +5,13 @@ module.exports = function(grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
 
+        // to keep things simple we concat then lint the output
+        // to keep jQuery out of this, we add it in the extention's manifest.json
         concat: {
             dist: {
                 src: [
-                    'js/libs/*.js', // All JS in the libs folder
-                    'js/inject.js'  // This specific file
+                    'js/gcalendar.js',
+                    'js/inject.js'
                 ],
                 dest: 'ext/src/inject/compiled.js',
             }
@@ -25,7 +27,7 @@ module.exports = function(grunt) {
         watch: {
             scripts: {
                 files: ['Gruntfile.js', 'js/*.js'],
-                tasks: ['jshint', 'concat', 'uglify'],
+                tasks: ['concat', 'jshint', 'uglify'],
                 options: {
                     spawn: false,
                     reload: true
@@ -34,7 +36,7 @@ module.exports = function(grunt) {
         },
 
         jshint: {
-            all: ['Gruntfile.js', 'js/**/*.js', '!js/libs/*.js'],
+            all: ['Gruntfile.js', 'ext/src/inject/compiled.js'],
             options : {
                 "esversion": 6,
                 "asi": true ,
@@ -70,7 +72,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-commands');
 
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
-    grunt.registerTask('default', ['jshint', 'concat', 'uglify']);
+    grunt.registerTask('default', ['concat', 'jshint', 'uglify']);
     grunt.registerTask('dev', ['watch']);
     grunt.registerTask('build', ['commands']);
 
