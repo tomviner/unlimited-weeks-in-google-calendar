@@ -47,11 +47,7 @@ class Toolbar {
       * then trigger the custom_view_buttons_visible event
       */
     poll_custom_button_visibility(wait_ms = 500) {
-        if (
-            this.custom_view.is(":visible")
-            // &&
-            // this.buttons.filter(`.${BUTTON_CHECKED}`).is(":visible")
-        ) {
+        if (this.custom_view.is(":visible")) {
             console.log('button found: trigger custom_view_buttons_visible')
             $(document).trigger("custom_view_buttons_visible")
         } else {

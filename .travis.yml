@@ -9,18 +9,23 @@ python:
 
 install:
   - pip install pytest pytest-selenium chromedriver-installer
+
 script:
-  - grunt test
+  - pytest
 
 before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
+  # extensions are part of Chrome's head, so for headless testing
+  # compile the Javascript and the inject it manually in the test
   - nvm install node
   - npm install grunt-cli -g
   - npm install --only=dev
   - grunt default
 
 after_failure:
-  - 'for i in .log/*.html; do echo $i; cat "$i"; echo EOF; done'
+  # screenshots are the most helpful so print those first, before hitting
+  # the travis 4mb output limit
   - 'for i in .log/assets/*.png; do echo $i; base64 "$i"; echo EOF; done'
+  - 'for i in .log/*.html; do echo $i; cat "$i"; echo EOF; done'
   - 'for i in .log/assets/*.txt; do echo $i; cat "$i"; echo EOF; done'
