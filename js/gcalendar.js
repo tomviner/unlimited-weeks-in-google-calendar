@@ -48,10 +48,8 @@ class Toolbar {
       */
     poll_custom_button_visibility(wait_ms = 500) {
         if (this.custom_view.is(":visible")) {
-            console.log('button found: trigger custom_view_buttons_visible')
-            $(document).trigger("custom_view_buttons_visible")
+            $(document).trigger("toolbar_ready")
         } else {
-            console.log('no button found')
             setTimeout(w => this.poll_custom_button_visibility(w), wait_ms)
         }
     }

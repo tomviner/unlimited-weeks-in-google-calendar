@@ -185,24 +185,12 @@ let mini_cal = new MiniCal()
 let big_cal = new BigCal()
 let unlimited_weeks = new UnlimitedWeeks(toolbar, mini_cal, big_cal)
 
-console.log('start')
 $(document)
-    .on("custom_view_buttons_visible", function() {
-        console.log('.on custom_view_buttons_visible: setup')
+    .on("toolbar_ready", function() {
         unlimited_weeks.setup()
-        console.log('.on custom_view_buttons_visible: finished')
     })
 
 $(document).ready(function() {
-    // triggers custom_view_buttons_visible event
-    console.log('doc ready: poll')
+    // triggers toolbar_ready event
     toolbar.poll_custom_button_visibility()
-    console.log('doc ready: finished')
 })
-console.log('end')
-/*
-poll_custom_button_visibility
-custom_view_buttons_visible
-unlimited_weeks.setup()
-toolbar.inject_buttons()
-*/
