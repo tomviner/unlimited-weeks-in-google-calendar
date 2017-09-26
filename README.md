@@ -1,4 +1,4 @@
-# Unlimited weeks in Google Calendar
+# Unlimited weeks in Google Calendar [![Build Status](https://travis-ci.org/tomviner/unlimited-weeks-in-google-calendar.svg?branch=master)](https://travis-ci.org/tomviner/unlimited-weeks-in-google-calendar)
 
 [![Unlimited weeks in Google Calendar icon](ext/icons/icon-128x128.png)](https://chrome.google.com/webstore/detail/gcal-unlimited-weeks/kppipnjcfidhlpgckimgaifilmkolokj) | [![Chrome Web Store Badge](assets/ChromeWebStore_Badge_v2_340x96.png)](https://chrome.google.com/webstore/detail/gcal-unlimited-weeks/kppipnjcfidhlpgckimgaifilmkolokj)
 --- | ---
