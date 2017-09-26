@@ -1,6 +1,5 @@
 // import { BUTTON_CHECKED, BUTTON_CONTENT, trigger, MiniCal, BigCal, Toolbar } from 'gcalendar'
 
-
 /** Key operations of the extension. */
 class UnlimitedWeeks {
     constructor(toolbar, mini_cal, big_cal) {

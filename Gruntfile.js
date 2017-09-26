@@ -57,8 +57,11 @@ module.exports = function(grunt) {
         },
 
         commands: {
-            run_shell: {
+            build: {
                 cmd: './make-package.sh'
+            },
+            test: {
+                cmd: 'pytest'
             },
         },
 
@@ -74,6 +77,7 @@ module.exports = function(grunt) {
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
     grunt.registerTask('default', ['concat', 'jshint', 'uglify']);
     grunt.registerTask('dev', ['watch']);
-    grunt.registerTask('build', ['commands']);
+    grunt.registerTask('build', ['commands:build']);
+    grunt.registerTask('test', ['commands:test']);
 
 };

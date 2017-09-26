@@ -1,9 +1,5 @@
 dist: trusty
 
-cache:
-  directories:
-  - .cache
-
 addons:
   chrome: stable
 
@@ -14,16 +10,13 @@ python:
 install:
   - pip install pytest pytest-selenium chromedriver-installer
 script:
-  - pytest -s
+  - grunt test
 
 before_script:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  # remaining steps give xvfb some time to start
   - nvm install node
   - npm install grunt-cli -g
   - npm install --only=dev
-  - grunt default # build js
+  - grunt default
 
 after_failure:
   - 'for i in .log/*.html; do echo $i; cat "$i"; echo EOF; done'
