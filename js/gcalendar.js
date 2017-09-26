@@ -1,6 +1,6 @@
 /* jshint esversion: 6 */
 
-// export { BUTTON_CHECKED, BUTTON_CONTENT, trigger, MiniCal, BigCal, Toolbar }
+// export { BUTTON_CHECKED, BUTTON_CONTENT, trigger, NavCal, MainCal, Toolbar }
 
 const BUTTON_CHECKED = 'goog-imageless-button-checked'
 const BUTTON_CONTENT = 'goog-imageless-button-content'
@@ -43,8 +43,8 @@ class Toolbar {
         return this.custom_view.is(`.${BUTTON_CHECKED}`)
     }
 
-    /** recursively poll the visibility of the custom view button
-      * then trigger the custom_view_buttons_visible event
+    /** poll visibility of the custom view button
+      * then trigger the toolbar_ready event
       */
     poll_custom_button_visibility(wait_ms = 500) {
         if (this.custom_view.is(":visible")) {
@@ -93,8 +93,8 @@ class Toolbar {
 }
 
 
-/** Represents the main calendar. */
-class BigCal {
+/** Represents the large calendar. */
+class MainCal {
     get date_labels() {
         return $('#gridcontainer span[class^="ca-cdp"]')
     }
@@ -126,7 +126,7 @@ class BigCal {
 
 
 /** Represents the small calendar shown at the top left. */
-class MiniCal {
+class NavCal {
     constructor(height = 6) {
         // in week rows
         this.height = height

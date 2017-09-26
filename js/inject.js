@@ -1,12 +1,12 @@
-// import { BUTTON_CHECKED, BUTTON_CONTENT, trigger, MiniCal, BigCal, Toolbar } from 'gcalendar'
+// import { BUTTON_CHECKED, BUTTON_CONTENT, trigger, NavCal, MainCal, Toolbar } from 'gcalendar'
 
 /** Key operations of the extension. */
 class UnlimitedWeeks {
-    constructor(toolbar, mini_cal, big_cal) {
+    constructor(toolbar, nav_cal, main_cal) {
         this.storage_key = 'gcal-unlim-weeks_num-weeks'
         this.toolbar = toolbar
-        this.mini_cal = mini_cal
-        this.big_cal = big_cal
+        this.nav_cal = nav_cal
+        this.main_cal = main_cal
     }
 
     /** add buttons to toolbar and restore the previous number of weeks
@@ -49,9 +49,9 @@ class UnlimitedWeeks {
     alter_weeks(delta) {
         if (this.toolbar.is_custom_view_active) {
             // simply adjust the number of weeks currently shown
-            this.display_weeks(this.big_cal.num_weeks + delta)
+            this.display_weeks(this.main_cal.num_weeks + delta)
         } else {
-            if (!this.big_cal.is_active) {
+            if (!this.main_cal.is_active) {
                 // probably in agenda mode
                 trigger('mousedown mouseup', this.toolbar.custom_view)
             }
@@ -72,13 +72,13 @@ class UnlimitedWeeks {
         if (num_weeks < 2) {
             num_weeks = 2
         }
-        let target_start_day_num = this.big_cal.first_day_num
+        let target_start_day_num = this.main_cal.first_day_num
 
         // move to custom view, 'click' doesn't work here
         trigger('mousedown mouseup', this.toolbar.custom_view)
 
         // ensure start date is visible in mini cal
-        this.mini_cal.navigate_to_day_num(target_start_day_num)
+        this.nav_cal.navigate_to_day_num(target_start_day_num)
 
         // do a double manoeuvre: click next month during a click drag over the mini calendar.
         // this is how we reach more than one month
@@ -102,42 +102,42 @@ class UnlimitedWeeks {
       */
     allocate_weeks(weeks_left) {
         while (weeks_left > 0) {
-            let weeks_in_month = this.mini_cal.week_rows_in_month
+            let weeks_in_month = this.nav_cal.week_rows_in_month
             if (weeks_in_month > weeks_left) {
                 break
             }
             weeks_left -= weeks_in_month
-            this.mini_cal.month_forward()
+            this.nav_cal.month_forward()
         }
         return Math.max(7 * weeks_left, 0)
     }
 
     get_start_cell() {
-        let index = this.mini_cal.current_month_start_index + 7
-        return this.mini_cal.nth(index)
+        let index = this.nav_cal.current_month_start_index + 7
+        return this.nav_cal.nth(index)
     }
 
     get_end_cell(days_remaining) {
-        let index = days_remaining + this.mini_cal.current_month_start_index
-        return this.mini_cal.nth(index)
+        let index = days_remaining + this.nav_cal.current_month_start_index
+        return this.nav_cal.nth(index)
     }
 
     /** move the calandar back to the date it started at */
     move_weeks(start_day_num) {
         // move active range forward, out the way
-        this.mini_cal.month_forward()
+        this.nav_cal.month_forward()
         // we must click outside the active range, otherwise, we just select a single day
-        trigger('mousedown mouseup', this.mini_cal.last)
+        trigger('mousedown mouseup', this.nav_cal.last)
 
         // now click the date we want, in the mini map
-        this.mini_cal.navigate_to_day_num(start_day_num)
-        trigger('mousedown mouseup', this.mini_cal.cell_from_day_num(start_day_num))
+        this.nav_cal.navigate_to_day_num(start_day_num)
+        trigger('mousedown mouseup', this.nav_cal.cell_from_day_num(start_day_num))
     }
 
     write_custom_button_label(num_weeks=null) {
         this.toolbar.custom_view
             .find(`.${BUTTON_CONTENT}`)
-            .text(`${num_weeks || this.big_cal.num_weeks} weeks`)
+            .text(`${num_weeks || this.main_cal.num_weeks} weeks`)
     }
 
 
@@ -150,7 +150,7 @@ class UnlimitedWeeks {
     save_num_weeks() {
         if (this.can_persist) {
             chrome.storage.sync.set({
-                [this.storage_key]: this.big_cal.num_weeks
+                [this.storage_key]: this.main_cal.num_weeks
             })
         }
     }
@@ -158,7 +158,7 @@ class UnlimitedWeeks {
     /** returns a promise */
     load_num_weeks() {
         if (!this.can_persist) {
-            return new Promise(resolve => resolve(this.big_cal.num_weeks))
+            return new Promise(resolve => resolve(this.main_cal.num_weeks))
         }
         return new Promise(resolve =>
             chrome.storage.sync.get(this.storage_key, data => {
@@ -170,9 +170,9 @@ class UnlimitedWeeks {
                     return resolve(data[this.storage_key])
                 } else {
                     // fallback to counting weeks currently shown
-                    // however in day/week/agenda mode big_cal.num_weeks will return 0
+                    // however in day/week/agenda mode main_cal.num_weeks will return 0
                     // so in that case just use a sensible starting number
-                    return resolve(this.big_cal.num_weeks || 4)
+                    return resolve(this.main_cal.num_weeks || 4)
                 }
             })
         )
@@ -181,9 +181,10 @@ class UnlimitedWeeks {
 
 
 let toolbar = new Toolbar()
-let mini_cal = new MiniCal()
-let big_cal = new BigCal()
-let unlimited_weeks = new UnlimitedWeeks(toolbar, mini_cal, big_cal)
+let nav_cal = new NavCal()
+let main_cal = new MainCal()
+let unlimited_weeks = new UnlimitedWeeks(
+    toolbar=toolbar, nav_cal=nav_cal, main_cal=main_cal)
 
 $(document)
     .on("toolbar_ready", function() {
