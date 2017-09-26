@@ -15,7 +15,7 @@ node_js:
 install:
   - pip install pytest pytest-selenium chromedriver-installer
 script:
-  - pytest -sv
+  - pytest -sq
 
 before_script:
   - "export DISPLAY=:99.0"
@@ -28,5 +28,5 @@ before_script:
 
 after_failure:
   - 'for i in .log/*.html; do echo $i; cat "$i"; echo EOF; done'
-  - 'for i in .log/assets/*.txt; do echo $i; cat "$i"; echo EOF; done'
   - 'for i in .log/assets/*.png; do echo $i; base64 "$i"; echo EOF; done'
+  - 'for i in .log/assets/*.txt; do echo $i; cat "$i"; echo EOF; done'
