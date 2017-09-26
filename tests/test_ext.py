@@ -24,8 +24,8 @@ def authed_get(selenium, url):
             '[type=password][name=password]').send_keys(PASSWORD + Keys.ENTER)
     time.sleep(2)
     i += 1; print(i)
-    if not selenium.current_url.startswith(LOGIN_URL):
-        return
+    # if not selenium.current_url.startswith(LOGIN_URL):
+    #     return
 
     # confirm = selenium.find_element_by_xpath('//ul[1]/li[3]')
     # print(confirm)
