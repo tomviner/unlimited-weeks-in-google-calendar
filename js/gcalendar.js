@@ -125,7 +125,8 @@ class MainCal {
 }
 
 
-/** Represents the small calendar shown at the top left. */
+/** Represents the small calendar shown at the top left, which is used for
+  * navigating and commanding the main calendar. */
 class NavCal {
     constructor(height = 6) {
         // in week rows

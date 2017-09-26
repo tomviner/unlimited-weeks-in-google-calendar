@@ -12,4 +12,6 @@ rm -f "${zip_file:-}"
 
 apack "${zip_file:-}" ./ext --
 
+
+git tag ${version:?}
 echo "Publish at https://chrome.google.com/webstore/developer/dashboard"

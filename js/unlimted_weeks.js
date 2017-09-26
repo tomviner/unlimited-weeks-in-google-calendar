@@ -55,7 +55,6 @@ class UnlimitedWeeks {
                 // probably in agenda mode
                 trigger('mousedown mouseup', this.toolbar.custom_view)
             }
-            //
             this.load_num_weeks().then(num_weeks =>
                 this.display_weeks(num_weeks + delta)
             )
@@ -74,13 +73,11 @@ class UnlimitedWeeks {
         }
         let target_start_day_num = this.main_cal.first_day_num
 
-        // move to custom view, 'click' doesn't work here
-        trigger('mousedown mouseup', this.toolbar.custom_view)
-
         // ensure start date is visible in mini cal
         this.nav_cal.navigate_to_day_num(target_start_day_num)
 
-        // do a double manoeuvre: click next month during a click drag over the mini calendar.
+        // do a double manoeuvre: click next month repeatedly during a click drag over
+        // the mini calendar.
         // this is how we reach more than one month
         trigger('mousedown', this.get_start_cell())
         let days_remaining = this.allocate_weeks(num_weeks)
@@ -183,13 +180,15 @@ class UnlimitedWeeks {
 /*
 How this works:
 
-- wait for the toolbar to be visible (poll_custom_button_visibility)
-- when it is (trigger toolbar_ready event -> unlimited_weeks.setup())
-- add 2 extra buttons to the toobar (toolbar.inject_buttons)
-- restore custom button state and the main calendar's number of weeks
-- the click handlers for these new buttons adjust the number of weeks by:
-    - ensuring custom view is active
-    -
+- wait for the toolbar to be visible
+- when it is, add 2 extra buttons to the toobar
+- restore the main calendar's number of weeks, if custom view is active
+- the click handlers for these new buttons adjust the number of weeks:
+    - ensure custom view is active
+    - using the navigation calendar, do a double manoeuvre:
+        - click next month repeatedly during a click drag over the mini calendar
+        - this is how we reach more than one month
+- use browser storage to persist the number of weeks selected
 */
 
 let toolbar = new Toolbar()
