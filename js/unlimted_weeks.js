@@ -177,19 +177,7 @@ class UnlimitedWeeks {
 }
 
 
-/*
-How this works:
-
-- wait for the toolbar to be visible
-- when it is, add 2 extra buttons to the toobar
-- restore the main calendar's number of weeks, if custom view is active
-- the click handlers for these new buttons adjust the number of weeks:
-    - ensure custom view is active
-    - using the navigation calendar, do a double manoeuvre:
-        - click next month repeatedly during a click drag over the mini calendar
-        - this is how we reach more than one month
-- use browser storage to persist the number of weeks selected
-*/
+/** See README.md for how this extension works */
 
 let toolbar = new Toolbar()
 let nav_cal = new NavCal()
