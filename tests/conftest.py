@@ -4,7 +4,7 @@ import time
 import pytest
 
 EXT_PATH = 'ext/'
-HEADLESS = True
+HEADLESS = False
 CACHE_AUTH = False
 
 
