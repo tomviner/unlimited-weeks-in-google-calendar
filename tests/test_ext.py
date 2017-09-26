@@ -59,7 +59,7 @@ def authed_get(selenium, url):
 
     # if not selenium.current_url.startswith(LOGIN_URL):
     #     return
-
+    1/0
     i += 1; print(i)
     html = selenium.execute_script("return document.documentElement.outerHTML")
     print(html)
