@@ -24,42 +24,42 @@ def authed_get(selenium, url):
             '[type=password][name=password]').send_keys(PASSWORD + Keys.ENTER)
     time.sleep(2)
     i += 1; print(i)
-    # if not selenium.current_url.startswith(LOGIN_URL):
-    #     return
+    if not selenium.current_url.startswith(LOGIN_URL):
+        return
 
-    # confirm = selenium.find_element_by_xpath('//ul[1]/li[3]')
-    # print(confirm)
-    # confirm.click()
-    # time.sleep(2)
-    # i += 1; print(i)
+    confirm = selenium.find_element_by_xpath('//ul[1]/li[3]')
+    print(confirm)
+    confirm.click()
+    time.sleep(2)
+    i += 1; print(i)
 
-    # if not selenium.current_url.startswith(LOGIN_URL):
-    #     return
+    if not selenium.current_url.startswith(LOGIN_URL):
+        return
 
-    # inp = selenium.find_element_by_id('phoneNumberId')
-    # inp.click()
-    # time.sleep(1)
-    # i += 1; print(i)
+    inp = selenium.find_element_by_id('phoneNumberId')
+    inp.click()
+    time.sleep(1)
+    i += 1; print(i)
 
-    # if not selenium.current_url.startswith(LOGIN_URL):
-    #     return
+    if not selenium.current_url.startswith(LOGIN_URL):
+        return
 
-    # inp.send_keys(PHONE)
-    # time.sleep(2)
-    # i += 1; print(i)
+    inp.send_keys(PHONE)
+    time.sleep(2)
+    i += 1; print(i)
 
-    # if not selenium.current_url.startswith(LOGIN_URL):
-    #     return
+    if not selenium.current_url.startswith(LOGIN_URL):
+        return
 
-    # nxt = selenium.find_element_by_id('next')
-    # nxt.click()
+    nxt = selenium.find_element_by_id('next')
+    nxt.click()
 
-    # time.sleep(2)
-    # i += 1; print(i)
+    time.sleep(2)
+    i += 1; print(i)
 
-    # if not selenium.current_url.startswith(LOGIN_URL):
-    #     return
-    1/0
+    if not selenium.current_url.startswith(LOGIN_URL):
+        return
+
     i += 1; print(i)
     html = selenium.execute_script("return document.documentElement.outerHTML")
     print(html)
