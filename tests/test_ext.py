@@ -27,38 +27,38 @@ def authed_get(selenium, url):
     if not selenium.current_url.startswith(LOGIN_URL):
         return
 
-    confirm = selenium.find_element_by_xpath('//ul[1]/li[3]')
-    print(confirm)
-    confirm.click()
-    time.sleep(2)
-    i += 1; print(i)
+    # confirm = selenium.find_element_by_xpath('//ul[1]/li[3]')
+    # print(confirm)
+    # confirm.click()
+    # time.sleep(2)
+    # i += 1; print(i)
 
-    if not selenium.current_url.startswith(LOGIN_URL):
-        return
+    # if not selenium.current_url.startswith(LOGIN_URL):
+    #     return
 
-    inp = selenium.find_element_by_id('phoneNumberId')
-    inp.click()
-    time.sleep(1)
-    i += 1; print(i)
+    # inp = selenium.find_element_by_id('phoneNumberId')
+    # inp.click()
+    # time.sleep(1)
+    # i += 1; print(i)
 
-    if not selenium.current_url.startswith(LOGIN_URL):
-        return
+    # if not selenium.current_url.startswith(LOGIN_URL):
+    #     return
 
-    inp.send_keys(PHONE)
-    time.sleep(2)
-    i += 1; print(i)
+    # inp.send_keys(PHONE)
+    # time.sleep(2)
+    # i += 1; print(i)
 
-    if not selenium.current_url.startswith(LOGIN_URL):
-        return
+    # if not selenium.current_url.startswith(LOGIN_URL):
+    #     return
 
-    nxt = selenium.find_element_by_id('next')
-    nxt.click()
+    # nxt = selenium.find_element_by_id('next')
+    # nxt.click()
 
-    time.sleep(2)
-    i += 1; print(i)
+    # time.sleep(2)
+    # i += 1; print(i)
 
-    if not selenium.current_url.startswith(LOGIN_URL):
-        return
+    # if not selenium.current_url.startswith(LOGIN_URL):
+    #     return
 
     i += 1; print(i)
     html = selenium.execute_script("return document.documentElement.outerHTML")
@@ -77,7 +77,7 @@ def test_ext(selenium):
         time.sleep(1)
         jquery_js = open('ext/src/inject/jquery.min.js').read()
         selenium.execute_script(jquery_js)
-        inject_js = open('ext/src/inject/compiled.js').read()
+        inject_js = open('ext/src/inject/compiled.min.js').read()
         selenium.execute_script(inject_js)
         time.sleep(1)
 
