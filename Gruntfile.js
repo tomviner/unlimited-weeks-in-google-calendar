@@ -11,7 +11,7 @@ module.exports = function(grunt) {
             dist: {
                 src: [
                     'js/gcalendar.js',
-                    'js/inject.js'
+                    'js/unlimted_weeks.js'
                 ],
                 dest: 'ext/src/inject/compiled.js',
             }
