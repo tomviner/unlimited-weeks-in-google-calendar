@@ -180,6 +180,18 @@ class UnlimitedWeeks {
 }
 
 
+/*
+How this works:
+
+- wait for the toolbar to be visible (poll_custom_button_visibility)
+- when it is (trigger toolbar_ready event -> unlimited_weeks.setup())
+- add 2 extra buttons to the toobar (toolbar.inject_buttons)
+- restore custom button state and the main calendar's number of weeks
+- the click handlers for these new buttons adjust the number of weeks by:
+    - ensuring custom view is active
+    -
+*/
+
 let toolbar = new Toolbar()
 let nav_cal = new NavCal()
 let main_cal = new MainCal()
