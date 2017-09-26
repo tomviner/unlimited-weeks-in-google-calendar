@@ -10,7 +10,8 @@ addons:
 language: python
 python:
   - "3.6"
-
+node_js:
+  - "0.10"
 install:
   - pip install pytest pytest-selenium chromedriver-installer
 script:
@@ -20,6 +21,9 @@ before_script:
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
   - sleep 3 # give xvfb some time to start
+  - nvm install node
+  - npm install grunt-cli -g
+  - npm install --only=dev
   - grunt default # build js
 
 after_failure:
