@@ -11,15 +11,15 @@ Adds + and - buttons to display as many weeks as your screen can handle.
 
 ![screenshot](assets/screenshot-1280x800.png)
 
-### How this works:
+### How this extension works:
 
 - wait for the toolbar to be visible
-- when it is, add 2 extra buttons to the toobar
+- add 2 extra buttons to it
 - restore the main calendar's number of weeks, if custom view is active
-- the click handlers for these new buttons adjust the number of weeks:
+- these new buttons adjust the number of weeks:
     - ensure custom view is active
     - using the navigation calendar, do a double manoeuvre:
         - click next month repeatedly during a click drag over the mini calendar
         - this is how we reach more than one month
-    - ensure the main calendar is navigated to the original start date
+    - ensure the calendar is still on the original start date
 - use browser storage to persist the number of weeks selected

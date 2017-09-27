@@ -126,7 +126,7 @@ class MainCal {
 
 
 /** Represents the small calendar shown at the top left, which is used for
-  * navigating and commanding the main calendar. */
+  * navigating the main calendar. */
 class NavCal {
     constructor(height = 6) {
         // in week rows
@@ -179,7 +179,7 @@ class NavCal {
     get next_month_starts_low() {
         return this.next_month_start_index >= 7 * (this.height - 1)
     }
-    get week_rows_in_month() {
+    get num_week_rows_in_month() {
         // bools get cast to 0 or 1 here. each true is an extra week
         return 3 + this.current_month_starts_high + this.next_month_starts_low
     }

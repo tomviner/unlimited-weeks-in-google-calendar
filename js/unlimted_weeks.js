@@ -99,7 +99,7 @@ class UnlimitedWeeks {
       */
     allocate_weeks(weeks_left) {
         while (weeks_left > 0) {
-            let weeks_in_month = this.nav_cal.week_rows_in_month
+            let weeks_in_month = this.nav_cal.num_week_rows_in_month
             if (weeks_in_month > weeks_left) {
                 break
             }
