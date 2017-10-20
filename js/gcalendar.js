@@ -186,11 +186,20 @@ class NavCal {
     cell_from_day_num(day_num) {
         return this.cells.filter(`[id$="${day_num}"]`)
     }
+    buttons() {
+        return $('#drawerMiniMonthNavigator > div > div > div > content > span')
+    }
+    backward_button() {
+        return this.buttons.eq(0)
+    }
+    forward_button() {
+        return this.buttons.eq(1)
+    }
     month_backward() {
-        trigger('mousedown mouseup', $('.dp-sb-prev'))
+        return trigger('mousedown mouseup', this.backward_button)
     }
     month_forward() {
-        trigger('mousedown mouseup', $('.dp-sb-next'))
+        return trigger('mousedown mouseup', this.forward_button)
     }
     navigate_to_day_num(day_num) {
         let i = 0
