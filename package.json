@@ -3,7 +3,7 @@
   "repository": "github:tomviner/unlimited-weeks-in-google-calendar",
   "license": "MIT",
   "devDependencies": {
-    "grunt": "^1.0.1",
+    "grunt": "^1.5.2",
     "grunt-commands": "^0.1.8",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-jshint": "^1.1.0",
